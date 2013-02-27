@@ -31,14 +31,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     statusBar()->addPermanentWidget(_progressBar);
     _progressBar->hide();
 
-    _tagCounter = new TagCounter(_labelTagCount);
-
     ui.splitter->setSizes(QList<int>() << 100 << 200 << 300);
 
     _tagCountModel  = new TagCountModel (this);
     _tagDetailModel = new TagDetailModel(QString(), this);
-    _extractor = new Extractor;
-    _tagFilter = new TagFilter(_extractor, _tagCountModel);
+
+    _tagCounter = new TagCounter(_labelTagCount);
+    _tagCountModel->setCounter(_tagCounter);
 
     ui.tvTagCount->setModel(_tagCountModel);
     ui.tvTagCount->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -64,35 +63,34 @@ void MainWindow::closeEvent(QCloseEvent*) {
 
 void MainWindow::onExtract()
 {
-    _sourcePath = QDir::toNativeSeparators(
+    _projectPath = QDir::toNativeSeparators(
                 QFileDialog::getExistingDirectory(this, tr("Select dir"), "."));
-    if(_sourcePath.isEmpty())
+    if(_projectPath.isEmpty())
         return;
 
     _tagCountModel->clear();
 
     // progress actor
     ProgressDisplay progressChecker(_progressBar);
-    int fileCount = countFiles();
-    progressChecker.setMaximum(fileCount);
+    progressChecker.setMaximum(countFiles());
     _progressBar->show();
     _progressBar->setValue(0);
-
-    // file and line actor
-    FileCounter fileCounter(_labelFileCount);
-    LineCounter lineCounter(_labelLineCount);
-    _tagCountModel->setCounter(_tagCounter);
-    _tagCounter->reset();
-
-    // extracting actor
-    _extractor->setPattern("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*");
-    _tagFilter->setFilter(getTagFilter(), useRegEx());
 
     // File name display
     FileLog fileLog(statusBar());
 
+    // file and line counters
+    FileCounter fileCounter(_labelFileCount);
+    LineCounter lineCounter(_labelLineCount);
+    _tagCounter->reset();
+
+    // extractor and filter
+    Extractor extractor("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*");
+    TagFilter tagFilter(&extractor, _tagCountModel);
+    tagFilter.setFilter(getTagFilter(), useRegEx());
+
     // apply actors on the files
-    iterate(createIterator(), Actors() << _tagFilter << &fileCounter
+    iterate(createIterator(), Actors() << &tagFilter << &fileCounter
                                        << &lineCounter << &progressChecker << &fileLog);
 
     _progressBar->hide();
@@ -100,7 +98,7 @@ void MainWindow::onExtract()
 
 void MainWindow::onPick()
 {
-    if(getRandomPickSize() == 0)
+    if(getRandomPickSize() <= 0)
         return;
     _tagCountModel->removeSmall(getRemoveSmallSize());
     _tagCountModel->pick(getRandomPickSize());
@@ -118,7 +116,7 @@ void MainWindow::onSave()
 {
     QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select path"), ".");
     if(!folderPath.isEmpty())
-        _tagCountModel->save(folderPath, _sourcePath);
+        _tagCountModel->save(folderPath, _projectPath);
 }
 
 void MainWindow::onTagClicked(const QModelIndex& idx)
@@ -142,7 +140,7 @@ void MainWindow::onDeleteTag()
                            _tagCountModel->index(idx.row(),
                                                  TagCountModel::COL_TAG)).toString();
     foreach(const QString& tag, toBeRemoved)
-        _tagCountModel->remove(tag);
+        _tagCountModel->removeTag(tag);
 }
 
 void MainWindow::onTagDetailClicked(const QModelIndex& idx)
@@ -151,7 +149,7 @@ void MainWindow::onTagDetailClicked(const QModelIndex& idx)
         return;
 
     QString filePath = _tagDetailModel->data(_tagDetailModel->index(idx.row(), TagDetailModel::COL_FILEPATH)).toString();
-    int     line     = _tagDetailModel->data(_tagDetailModel->index(idx.row(), TagDetailModel::COL_LINE)).toInt();
+    int     line     = _tagDetailModel->data(_tagDetailModel->index(idx.row(), TagDetailModel::COL_LINENUM)).toInt();
     QFile file(filePath);
     if(!file.open(QFile::ReadOnly))
         return;
@@ -174,7 +172,7 @@ void MainWindow::onTagDetailClicked(const QModelIndex& idx)
 }
 
 QDirIterator* MainWindow::createIterator() const {
-    return new QDirIterator(_sourcePath, getNameFilter(),
+    return new QDirIterator(_projectPath, getNameFilter(),
                             QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot,
                             QDirIterator::Subdirectories);
 }
@@ -202,8 +200,8 @@ void MainWindow::setCurrentDetailModel(TagDetailModel* model)
     {
         _tagDetailModel = model;
         ui.tvTagDetail->setModel(model);
-        ui.tvTagDetail->hideColumn(0);
-        ui.tvTagDetail->hideColumn(1);
+        ui.tvTagDetail->hideColumn(TagDetailModel::COL_FILEPATH);
+        ui.tvTagDetail->hideColumn(TagDetailModel::COL_LINENUM);
     }
 }
 

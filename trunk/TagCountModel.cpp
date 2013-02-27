@@ -41,11 +41,11 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
         int lastRow = detailModel->rowCount();
         detailModel->insertRow(lastRow);
         detailModel->setData(detailModel->index(lastRow, TagDetailModel::COL_FILEPATH), block.getFilePath());
-        detailModel->setData(detailModel->index(lastRow, TagDetailModel::COL_LINE),     block.getLineNumber());
+        detailModel->setData(detailModel->index(lastRow, TagDetailModel::COL_LINENUM),     block.getLineNumber());
         detailModel->setData(detailModel->index(lastRow, TagDetailModel::COL_CONTENT),  block.getContent());
     }
 
-    if(_counter)
+    if(_counter != 0)
         _counter->increase();
 }
 
@@ -74,29 +74,37 @@ void TagCountModel::pick(int n)
 
 void TagCountModel::removeSmall(int n)
 {
-    if(n <= 0 || n >= rowCount())
+    if(n <= 0)
         return;
 
-    for(int row = 0; row < rowCount();) {
-        if(data(index(row, COL_COUNT)).toInt() < n)
-            remove(data(index(row, COL_TAG)).toString());
+    for(int row = 0; row < rowCount();)
+    {
+        if(getCount(row) < n)
+            removeRow(row);
         else
             row ++;
     }
 }
 
-void TagCountModel::remove(const QString& tag)
+void TagCountModel::removeTag(const QString& tag)
 {
     int row = findTag(tag);
     if(row == -1)
         return;
 
-    if(_counter)
-        _counter->decrease(getDetail(tag)->rowCount());
+    removeRow(row);
+}
 
+void TagCountModel::removeRow(int row)
+{
+    QString tag = getKeyword(row);
     getDetail(tag)->deleteLater();
     _details.remove(tag);
-    removeRow(row);
+
+    if(_counter != 0)
+        _counter->decrease(getCount(row));
+
+    QStandardItemModel::removeRow(row);
 }
 
 void TagCountModel::save(const QString& dirPath, const QString& sourcePath)
@@ -108,10 +116,11 @@ void TagCountModel::save(const QString& dirPath, const QString& sourcePath)
         os << sourcePath << "\r\n";   // save source path
         for(int row = 0; row < rowCount(); ++row)
         {
-            QString tag = data(index(row, COL_TAG)).toString();
-            os << tag << "," << data(index(row, COL_COUNT)).toString() << "\r\n";   // save tag count
-            getDetail(tag)->save(dirPath + QDir::separator() + tag + ".csv",
-                                 sourcePath);       // save tag detail
+            QString tag = getKeyword(row);
+            os << tag << "," << getCount(row) << "\r\n";   // save tag count
+
+            // save tag detail to a separate file
+            getDetail(tag)->save(dirPath + QDir::separator() + tag + ".csv", sourcePath);
         }
     }
 }
@@ -146,4 +155,12 @@ int TagCountModel::findTag(const QString& tag) const
 {
     QModelIndexList indexes = match(index(0, COL_TAG), Qt::DisplayRole, tag, 1, Qt::MatchExactly);
     return indexes.isEmpty() ? -1 : indexes.front().row();
+}
+
+QString TagCountModel::getKeyword(int row) const {
+    return data(index(row, COL_TAG)).toString();
+}
+
+int TagCountModel::getCount(int row) const {
+    return data(index(row, COL_COUNT)).toInt();
 }

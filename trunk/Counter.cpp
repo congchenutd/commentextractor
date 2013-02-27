@@ -16,11 +16,11 @@ void LineCounter::run(const QString& filePath)
 {
     QFile file(filePath);
     if(file.open(QFile::ReadOnly))
-        increase(QTextDocument(file.readAll()).lineCount());
+        increase(QTextDocument(file.readAll()).lineCount());  // increase the count of lines
 }
 
 void FileCounter::run(const QString &) {
-    increase();
+    increase(1);  // increase the count of files by 1
 }
 
 

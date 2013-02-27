@@ -9,6 +9,7 @@ void ProgressDisplay::setMaximum(int max) {
 
 void ProgressDisplay::run(const QString&)
 {
-    _progressBar->setValue(_progressBar->value() + 1);
+    if(_progressBar != 0)
+        _progressBar->setValue(_progressBar->value() + 1);
     qApp->processEvents();
 }

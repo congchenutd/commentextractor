@@ -50,18 +50,15 @@ private:
 private:
     Ui::MainWindow ui;
 
-    QString _sourcePath;
-    Extractor* _extractor;
-    TagFilter* _tagFilter;
-    TagCountModel* _tagCountModel;
+    QString _projectPath;
+    TagCountModel*  _tagCountModel;
     TagDetailModel* _tagDetailModel;
+    TagCounter*     _tagCounter;
     
     QLabel* _labelFileCount;
     QLabel* _labelLineCount;
     QLabel* _labelTagCount;
-    QString _filePath;
     QProgressBar* _progressBar;
-    TagCounter*   _tagCounter;
 };
 
 #endif // MAINWINDOW_H
