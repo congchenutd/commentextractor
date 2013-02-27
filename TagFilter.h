@@ -8,8 +8,11 @@
 class Extractor;
 class TagCountModel;
 
-// Extract content of a file, filter it by regex, and save it in a given model
-class TagFilter : public RunnableOnFile
+// Extract tags from a file, and save them in a given model
+// uses an extractor to get all the comments
+// use a filter (regex or string) to get tags
+// regex must have one capture named tag
+class TagFilter : public IRunnableOnFile
 {
 public:
     TagFilter(Extractor* extractor, TagCountModel* tagCountModel,
@@ -25,7 +28,7 @@ private:
 private:
     Extractor*     _extractor;
     TagCountModel* _model;
-    QString        _filter;
+    QString        _filter;     // regex or substring pattern
     bool           _useRegEx;
 };
 

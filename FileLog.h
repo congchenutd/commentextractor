@@ -6,7 +6,7 @@
 class QStatusBar;
 
 // shows file path of current file on given status bar
-class FileLog : public RunnableOnFile
+class FileLog : public IRunnableOnFile
 {
 public:
     FileLog(QStatusBar* statusBar);

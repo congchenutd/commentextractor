@@ -10,18 +10,22 @@ class QString;
 
 // Extractor extracts substrings from a file
 // the substrings are caught by a regular expression
-// implements RunnableOnFile
-class Extractor : public RunnableOnFile
+// implements IRunnableOnFile
+class Extractor : public IRunnableOnFile
 {
 public:
-    void setPattern(const QString& pattern) { _pattern = pattern; }  // Regular expression pattern
+    Extractor(const QString& pattern);   // RegEx pattern
     QList<TextBlock> getResult() const { return _result; }
 
-    void run(const QString& filePath);
+    void run(const QString& filePath);  // run extractor on the file with filePath
 
 private:
-    TextBlock extractOne   (const QString& text, const QString& filePath, int& cursor) const;
-    int       getLineNumber(const QString& text, int cursor) const;
+    // extract one matched substring from text, starting from cursor, filePath is the file containing the text
+    // cursor will be updated after each call
+    TextBlock extractOne(const QString& text, const QString& filePath, int& cursor) const;
+
+    // returns the line num of the cursor in the text
+    int getLineNumber(const QString& text, int cursor) const;
 
 private:
     QString _pattern;

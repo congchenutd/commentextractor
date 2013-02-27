@@ -14,13 +14,15 @@ public:
     QString getTag() const { return _tag; }
     void save(const QString& filePath, const QString& sourcePath);
 
-    static QList<TextBlock> fromFile(const QString& filePath, const QString& sourcePath);
+    // create a TagDetailModel from file
+    static QList<TextBlock> fromFile(const QString& filePath, const QString& projectPath);
 
 private:
     QString _tag;
 
 public:
-    enum {COL_FILEPATH, COL_LINE, COL_CONTENT};
+    enum {COL_FILEPATH, COL_LINENUM, COL_CONTENT};
+    static QString _lineSeparator;
 };
 
 #endif // TAGDETAILMODEL_H

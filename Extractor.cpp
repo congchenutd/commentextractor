@@ -3,6 +3,9 @@
 #include <QRegExp>
 #include <QFile>
 
+Extractor::Extractor(const QString& pattern)
+    : _pattern(pattern) {}
+
 void Extractor::run(const QString& filePath)
 {
     _result.clear();            // once a file

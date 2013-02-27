@@ -6,8 +6,8 @@
 class QProgressBar;
 
 // Updates a given progress bar
-// implements RunnableOnFile
-class ProgressDisplay : public RunnableOnFile
+// implements IRunnableOnFile
+class ProgressDisplay : public IRunnableOnFile
 {
 public:
     ProgressDisplay(QProgressBar* progressBar) : _progressBar(progressBar) {}

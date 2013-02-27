@@ -7,17 +7,19 @@
 //////////////////////////////////////////////////////////////////////////////////////
 TagFilter::TagFilter(Extractor* extractor, TagCountModel* tagCountModel,
                      const QString& filter, bool useRegEx)
-    : _extractor(extractor), _model(tagCountModel), _filter(filter), _useRegEx(useRegEx) {}
+    : _extractor(extractor),
+      _model(tagCountModel),
+      _filter(filter),
+      _useRegEx(useRegEx)
+{}
 
 void TagFilter::run(const QString& filePath)
 {
-    if(_extractor == 0)
+    if(_extractor == 0 || _filter.isEmpty())
         return;
 
     _extractor->run(filePath);
     QList<TextBlock> allBlocks = _extractor->getResult();   // all comments
-    if(_filter.isEmpty())
-        return;
 
     foreach(const TextBlock& block, allBlocks)
     {
@@ -36,11 +38,11 @@ QStringList TagFilter::findTagByRegEx(const QString& content) const
     QRegularExpressionMatch match = rx.match(content);
     while(match.hasMatch())
     {
-        QString captured = match.captured("tag").toUpper();  // regex must have one named capture
-        QRegularExpressionMatch matchTag = QRegularExpression("\\w+").match(captured);
+        QString captured = match.captured("tag").toUpper();  // a capture named "tag"
+        QRegularExpressionMatch matchTag = QRegularExpression("\\w+").match(captured);  // find a word
         if(matchTag.hasMatch())
         {
-            QString tag = matchTag.captured(0);  // remove none word chars
+            QString tag = matchTag.captured(0);
             if(!tag.isEmpty())
                 result << tag;
         }

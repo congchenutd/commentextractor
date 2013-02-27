@@ -5,5 +5,5 @@ FileLog::FileLog(QStatusBar* statusBar)
     : _statusBar(statusBar) {}
 
 void FileLog::run(const QString& filePath) {
-    _statusBar->showMessage(filePath, 10);
+    _statusBar->showMessage(filePath, 10);  // show filePath for 10 secs
 }
