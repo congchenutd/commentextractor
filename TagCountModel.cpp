@@ -14,9 +14,13 @@ TagCountModel::TagCountModel(QObject* parent, TagCounter* counter)
     setHeaderData(COL_COUNT, Qt::Horizontal, tr("Count"));
 }
 
+void TagCountModel::setProjectPath(const QString &projectPath) {
+    _projectPath = QDir::toNativeSeparators(projectPath);
+}
+
 void TagCountModel::addTag(const QString& tag, const TextBlock& block)
 {
-    TagDetailModel* detailModel = 0;
+    TagInstanceModel* detailModel = 0;
     int row = findTag(tag);
     if(row == -1)  // new tag
     {
@@ -25,14 +29,14 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
         setData(index(lastRow, COL_TAG),   tag);
         setData(index(lastRow, COL_COUNT), 1);
 
-        detailModel = new TagDetailModel(tag, this);
-        _details.insert(tag, detailModel);
+        detailModel = new TagInstanceModel(tag, this);
+        _instanceModels.insert(tag, detailModel);
     }
     else           // existing tag
     {
         setData(index(row, COL_TAG), tag);
         setData(index(row, COL_COUNT), data(index(row, COL_COUNT)).toInt() + 1);
-        detailModel = getDetail(tag);
+        detailModel = getInstanceModel(tag);
     }
 
     // add to the detail model
@@ -40,32 +44,32 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
     {
         int lastRow = detailModel->rowCount();
         detailModel->insertRow(lastRow);
-        detailModel->setData(detailModel->index(lastRow, TagDetailModel::COL_FILEPATH), block.getFilePath());
-        detailModel->setData(detailModel->index(lastRow, TagDetailModel::COL_LINENUM),     block.getLineNumber());
-        detailModel->setData(detailModel->index(lastRow, TagDetailModel::COL_CONTENT),  block.getContent());
+        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_FILEPATH), block.getFilePath());
+        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_LINENUM),     block.getLineNumber());
+        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_CONTENT),  block.getContent());
     }
 
     if(_counter != 0)
         _counter->increase();
 }
 
-TagDetailModel* TagCountModel::getDetail(const QString& tag) const {
-    return _details.contains(tag) ? _details[tag] : 0;
+TagInstanceModel* TagCountModel::getInstanceModel(const QString& tag) const {
+    return _instanceModels.contains(tag) ? _instanceModels[tag] : 0;
 }
 
 void TagCountModel::clear()
 {
     removeRows(0, rowCount());
-    foreach(TagDetailModel* detailModel, _details)
+    foreach(TagInstanceModel* detailModel, _instanceModels)
         detailModel->deleteLater();
-    _details.clear();
+    _instanceModels.clear();
 }
 
 void TagCountModel::pick(int n)
 {
-    for(QMap<QString, TagDetailModel*>::Iterator it = _details.begin(); it != _details.end(); ++it)
+    for(QMap<QString, TagInstanceModel*>::Iterator it = _instanceModels.begin(); it != _instanceModels.end(); ++it)
     {
-        TagDetailModel* newModel = it.value()->pick(n);  // a new model containing n picked instances
+        TagInstanceModel* newModel = it.value()->pick(n);  // a new model containing n picked instances
         if(newModel != it.value())
             it.value()->deleteLater();                   // delete the old
         *it = newModel;                                  // use the new model
@@ -80,47 +84,45 @@ void TagCountModel::removeSmall(int n)
     for(int row = 0; row < rowCount();)
     {
         if(getCount(row) < n)
-            removeRow(row);
+            remove(row);
         else
             row ++;
     }
 }
 
-void TagCountModel::removeTag(const QString& tag)
-{
-    int row = findTag(tag);
-    if(row == -1)
-        return;
-
-    removeRow(row);
+void TagCountModel::remove(const QString& tag) {
+    remove(findTag(tag));
 }
 
-void TagCountModel::removeRow(int row)
+void TagCountModel::remove(int row)
 {
+    if(row < 0)
+        return;
+
     QString tag = getKeyword(row);
-    getDetail(tag)->deleteLater();
-    _details.remove(tag);
+    getInstanceModel(tag)->deleteLater();
+    _instanceModels.remove(tag);
 
     if(_counter != 0)
         _counter->decrease(getCount(row));
 
-    QStandardItemModel::removeRow(row);
+    removeRow(row);
 }
 
-void TagCountModel::save(const QString& dirPath, const QString& sourcePath)
+void TagCountModel::save(const QString& dirPath)
 {
     QFile file(dirPath + QDir::separator() + "TagCount.csv");
     if(file.open(QFile::WriteOnly))
     {
         QTextStream os(&file);
-        os << sourcePath << "\r\n";   // save source path
+        os << _projectPath << "\r\n";   // save project path
         for(int row = 0; row < rowCount(); ++row)
         {
             QString tag = getKeyword(row);
             os << tag << "," << getCount(row) << "\r\n";   // save tag count
 
             // save tag detail to a separate file
-            getDetail(tag)->save(dirPath + QDir::separator() + tag + ".csv", sourcePath);
+            getInstanceModel(tag)->save(dirPath + QDir::separator() + tag + ".csv", _projectPath);
         }
     }
 }
@@ -133,7 +135,7 @@ void TagCountModel::load(const QString& dirPath)
     if(file.open(QFile::ReadOnly))
     {
         QTextStream is(&file);
-        QString sourcePath = QDir::toNativeSeparators(is.readLine());   // load source path
+        setProjectPath(is.readLine());   // load project path
 
         while(!is.atEnd())
         {
@@ -143,8 +145,8 @@ void TagCountModel::load(const QString& dirPath)
 
             // load tag detail
             QString tag = sections.at(COL_TAG);
-            QList<TextBlock> blocks = TagDetailModel::fromFile(dirPath + QDir::separator() + tag + ".csv",
-                                                               sourcePath);
+            QList<TextBlock> blocks = TagInstanceModel::load(dirPath + QDir::separator() + tag + ".csv",
+                                                           _projectPath);
             foreach(const TextBlock& block, blocks)
                 addTag(tag, block);
         }

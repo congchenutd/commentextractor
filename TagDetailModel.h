@@ -6,19 +6,23 @@
 class TextBlock;
 
 // stores instances of a tag
-class TagDetailModel : public QStandardItemModel
+class TagInstanceModel : public QStandardItemModel
 {
 public:
-    TagDetailModel(const QString& tag, QObject* parent = 0);
-    TagDetailModel* pick(int n);    // creates a new model containing n random instances
-    QString getTag() const { return _tag; }
-    void save(const QString& filePath, const QString& sourcePath);
+    TagInstanceModel(const QString& tag, QObject* parent = 0);
+    TagInstanceModel* pick(int n);    // creates a new model containing n random instances
+    QString getKeyword() const { return _keyword; }
 
-    // create a TagDetailModel from file
-    static QList<TextBlock> fromFile(const QString& filePath, const QString& projectPath);
+    // for convenience
+    QString getFilePath(int row) const;
+    int     getLineNum (int row) const;
+    QString getContent (int row) const;
+
+    static QList<TextBlock> load(const QString& filePath, const QString& projectPath);
+    void save(const QString& filePath, const QString& projectPath);
 
 private:
-    QString _tag;
+    QString _keyword;
 
 public:
     enum {COL_FILEPATH, COL_LINENUM, COL_CONTENT};

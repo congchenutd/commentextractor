@@ -5,6 +5,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = CommentExtractor
 TEMPLATE = app
 
+win32 {
+	RC_FILE = Resource.rc
+}
+mac {
+	ICON = Images/Find.icns
+}
 
 SOURCES += \
     Main.cpp \
@@ -17,7 +23,8 @@ SOURCES += \
     TagFilter.cpp \
     TagDetailModel.cpp \
     Highlighter.cpp \
-    MainWindow.cpp
+    MainWindow.cpp \
+    DlgSettings.cpp
 
 HEADERS  += \
     Extractor.h \
@@ -31,10 +38,12 @@ HEADERS  += \
     TagFilter.h \
     TagDetailModel.h \
     Highlighter.h \
-    MainWindow.h
+    MainWindow.h \
+    DlgSettings.h
 
 FORMS    += \
-    MainWindow.ui
+    MainWindow.ui \
+    DlgSettings.ui
 
 RESOURCES += \
     Resource.qrc

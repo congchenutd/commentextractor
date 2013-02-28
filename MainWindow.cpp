@@ -9,6 +9,7 @@
 #include "Writer.h"
 #include "Extractor.h"
 #include "Highlighter.h"
+#include "DlgSettings.h"
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QProgressBar>
@@ -16,7 +17,9 @@
 #include <QTextStream>
 #include <QScrollBar>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
+      _settings("settings.ini")
 {
     ui.setupUi(this);
     loadSettings();
@@ -31,44 +34,39 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     statusBar()->addPermanentWidget(_progressBar);
     _progressBar->hide();
 
-    ui.splitter->setSizes(QList<int>() << 100 << 200 << 300);
-
-    _tagCountModel  = new TagCountModel (this);
-    _tagDetailModel = new TagDetailModel(QString(), this);
-
     _tagCounter = new TagCounter(_labelTagCount);
-    _tagCountModel->setCounter(_tagCounter);
+    _modelCount  = new TagCountModel(this, _tagCounter);
+    _modelInstances = new TagInstanceModel(QString(), this);
 
-    ui.tvTagCount->setModel(_tagCountModel);
+    ui.tvTagCount->setModel(_modelCount);
     ui.tvTagCount->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    setCurrentDetailModel(_tagDetailModel);
+    setCurrentInstanceModel(_modelInstances);
 
     new Highlighter(ui.textEdit->document());
 
-    connect(ui.actionExtract, SIGNAL(triggered()), this, SLOT(onExtract()));
-    connect(ui.actionPick,    SIGNAL(triggered()), this, SLOT(onPick()));
-    connect(ui.actionOpen,    SIGNAL(triggered()), this, SLOT(onOpen()));
-    connect(ui.actionSave,    SIGNAL(triggered()), this, SLOT(onSave()));
-    connect(ui.actionDelete,  SIGNAL(triggered()), this, SLOT(onDeleteTag()));
+    connect(ui.actionExtract,  SIGNAL(triggered()), this, SLOT(onExtract()));
+    connect(ui.actionPick,     SIGNAL(triggered()), this, SLOT(onPick()));
+    connect(ui.actionLoad,     SIGNAL(triggered()), this, SLOT(onLoad()));
+    connect(ui.actionSave,     SIGNAL(triggered()), this, SLOT(onSave()));
+    connect(ui.actionDelete,   SIGNAL(triggered()), this, SLOT(onDeleteTag()));
+    connect(ui.actionSettings, SIGNAL(triggered()), this, SLOT(onSettings()));
     connect(ui.tvTagCount,  SIGNAL(clicked(QModelIndex)), this, SLOT(onTagClicked(QModelIndex)));
-    connect(ui.tvTagDetail, SIGNAL(clicked(QModelIndex)), this, SLOT(onTagDetailClicked(QModelIndex)));
+    connect(ui.tvInstances, SIGNAL(clicked(QModelIndex)), this, SLOT(onTagInstanceClicked(QModelIndex)));
     connect(ui.tvTagCount->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(onTagClicked(QModelIndex)));
 }
 
-void MainWindow::closeEvent(QCloseEvent*) {
-    saveSettings();
-}
-
 void MainWindow::onExtract()
 {
-    _projectPath = QDir::toNativeSeparators(
-                QFileDialog::getExistingDirectory(this, tr("Select dir"), "."));
-    if(_projectPath.isEmpty())
+    // get project path
+    QString projectPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to extract"), ".");
+    if(projectPath.isEmpty())
         return;
 
-    _tagCountModel->clear();
+    setProjectPath(projectPath);
+    _modelCount->setProjectPath(projectPath);
+    _modelCount->clear();
 
     // progress actor
     ProgressDisplay progressChecker(_progressBar);
@@ -86,7 +84,7 @@ void MainWindow::onExtract()
 
     // extractor and filter
     Extractor extractor("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*");
-    TagFilter tagFilter(&extractor, _tagCountModel);
+    TagFilter tagFilter(&extractor, _modelCount);
     tagFilter.setFilter(getTagFilter(), useRegEx());
 
     // apply actors on the files
@@ -100,70 +98,62 @@ void MainWindow::onPick()
 {
     if(getRandomPickSize() <= 0)
         return;
-    _tagCountModel->removeSmall(getRemoveSmallSize());
-    _tagCountModel->pick(getRandomPickSize());
-    setCurrentDetailModel(_tagCountModel->getDetail(_tagDetailModel->getTag()));
+    _modelCount->removeSmall(getRemoveSmallSize());
+    _modelCount->pick(getRandomPickSize());
+
+    // reset current instance model, because it may have been replaced
+    setCurrentInstanceModel(_modelCount->getInstanceModel(_modelInstances->getKeyword()));
 }
 
-void MainWindow::onOpen()
+void MainWindow::onLoad()
 {
-    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select path"), ".");
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to load"), ".");
     if(!folderPath.isEmpty())
-        _tagCountModel->load(folderPath);
+    {
+        _modelCount->load(folderPath);
+        setProjectPath(_modelCount->getProjectPath());  // count model will have loaded project path
+    }
 }
 
 void MainWindow::onSave()
 {
-    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select path"), ".");
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to save to"), ".");
     if(!folderPath.isEmpty())
-        _tagCountModel->save(folderPath, _projectPath);
+        _modelCount->save(folderPath);
 }
 
-void MainWindow::onTagClicked(const QModelIndex& idx)
+void MainWindow::onTagClicked(const QModelIndex& idx) {
+    if(idx.isValid())
+        setCurrentInstanceModel(_modelCount->getInstanceModel(_modelCount->getKeyword(idx.row())));
+}
+
+void MainWindow::onTagInstanceClicked(const QModelIndex& idx)
 {
     if(!idx.isValid())
         return;
 
-    TagDetailModel* model = _tagCountModel->getDetail(
-                                 _tagCountModel->data(
-                                     _tagCountModel->index(idx.row(),
-                                                           TagCountModel::COL_TAG)).toString());
-    setCurrentDetailModel(model);
-}
-
-void MainWindow::onDeleteTag()
-{
-    QModelIndexList rows = ui.tvTagCount->selectionModel()->selectedRows();
-    QStringList toBeRemoved;
-    foreach(const QModelIndex& idx, rows)
-        toBeRemoved << _tagCountModel->data(
-                           _tagCountModel->index(idx.row(),
-                                                 TagCountModel::COL_TAG)).toString();
-    foreach(const QString& tag, toBeRemoved)
-        _tagCountModel->removeTag(tag);
-}
-
-void MainWindow::onTagDetailClicked(const QModelIndex& idx)
-{
-    if(!idx.isValid())
-        return;
-
-    QString filePath = _tagDetailModel->data(_tagDetailModel->index(idx.row(), TagDetailModel::COL_FILEPATH)).toString();
-    int     line     = _tagDetailModel->data(_tagDetailModel->index(idx.row(), TagDetailModel::COL_LINENUM)).toInt();
+    QString filePath = _modelInstances->getFilePath(idx.row());
+    int     lineNum  = _modelInstances->getLineNum (idx.row());
     QFile file(filePath);
     if(!file.open(QFile::ReadOnly))
         return;
 
     statusBar()->showMessage(filePath);
 
+    // read file
     QTextStream os(&file);
     ui.textEdit->setPlainText(os.readAll());
+
+    // scroll to bottom so that the line will be shown at the top of the page
     ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
-    QTextBlock block = ui.textEdit->document()->findBlockByLineNumber(line - 1);
+
+    // find the block containing lineNum, and move cursor to the block
+    QTextBlock block = ui.textEdit->document()->findBlockByLineNumber(lineNum - 1);
     QTextCursor cursor(block);
     ui.textEdit->setTextCursor(cursor);
     ui.textEdit->ensureCursorVisible();
 
+    // highlight the line
     QTextEdit::ExtraSelection highlight;
     highlight.cursor = cursor;
     highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
@@ -171,16 +161,32 @@ void MainWindow::onTagDetailClicked(const QModelIndex& idx)
     ui.textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>() << highlight);
 }
 
+void MainWindow::onDeleteTag()
+{
+    QModelIndexList rows = ui.tvTagCount->selectionModel()->selectedRows();
+    QStringList toBeRemoved;
+    foreach(const QModelIndex& idx, rows)
+        toBeRemoved << _modelCount->getKeyword(idx.row());
+    foreach(const QString& tag, toBeRemoved)
+        _modelCount->remove(tag);
+}
+
+void MainWindow::onSettings()
+{
+    DlgSettings dlg(this);
+    if(dlg.exec() == QDialog::Accepted)
+        loadSettings();
+}
+
 QDirIterator* MainWindow::createIterator() const {
-    return new QDirIterator(_projectPath, getNameFilter(),
+    return new QDirIterator(_modelCount->getProjectPath(), getNameFilter(),
                             QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot,
                             QDirIterator::Subdirectories);
 }
 
 void MainWindow::iterate(QDirIterator* iterator, Actors& actors)
 {
-    while(iterator->hasNext())
-    {
+    while(iterator->hasNext()) {
         QString filePath = iterator->next();
         for(Actors::iterator it = actors.begin(); it != actors.end(); ++it)
             (*it)->run(filePath);
@@ -194,33 +200,35 @@ int MainWindow::countFiles()
     return fileCounter.getCount();
 }
 
-void MainWindow::setCurrentDetailModel(TagDetailModel* model)
+void MainWindow::setCurrentInstanceModel(TagInstanceModel* model)
 {
     if(model != 0)
     {
-        _tagDetailModel = model;
-        ui.tvTagDetail->setModel(model);
-        ui.tvTagDetail->hideColumn(TagDetailModel::COL_FILEPATH);
-        ui.tvTagDetail->hideColumn(TagDetailModel::COL_LINENUM);
+        _modelInstances = model;
+        ui.tvInstances->setModel(model);
+        ui.tvInstances->hideColumn(TagInstanceModel::COL_FILEPATH);
+        ui.tvInstances->hideColumn(TagInstanceModel::COL_LINENUM);
     }
+}
+
+void MainWindow::setProjectPath(const QString& projectPath) {
+    setWindowTitle(tr("CommentExtractor - ") + projectPath);
 }
 
 void MainWindow::loadSettings()
 {
-    QSettings settings("settings.ini", QSettings::IniFormat);
-    ui.leNameFilter->setText(settings.value("NameFilter").toString());
-    ui.leTagFilter ->setText(settings.value("TagFilter") .toString());
-    ui.sbRandomPickSize ->setValue(settings.value("RandomPickSize") .toInt());
-    ui.sbRemoveSmallSize->setValue(settings.value("RemoveSmallSize").toInt());
-    ui.cbRegEx->setChecked(settings.value("UseRegEx").toBool());
+    Settings settings;
+    qApp       ->setFont(settings.getUIFont());
+    ui.textEdit->setFont(settings.getEditorFont());
+    ui.splitter->restoreState(settings.getSplitterState());
 }
 
 void MainWindow::saveSettings()
 {
-    QSettings settings("settings.ini", QSettings::IniFormat);
-    settings.setValue("NameFilter",      ui.leNameFilter->text());
-    settings.setValue("TagFilter",       getTagFilter());
-    settings.setValue("RandomPickSize",  getRandomPickSize());
-    settings.setValue("RemoveSmallSize", getRemoveSmallSize());
-    settings.setValue("UseRegEx",        useRegEx());
+    Settings settings;
+    settings.setSplitterState(ui.splitter->saveState());
+}
+
+void MainWindow::closeEvent(QCloseEvent*) {
+    saveSettings();
 }

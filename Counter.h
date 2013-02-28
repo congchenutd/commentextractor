@@ -8,7 +8,7 @@
 class Counter
 {
 public:
-    virtual int getCount() const = 0;
+    virtual int  getCount() const = 0;
     virtual void increase(int n) = 0;
     virtual void decrease(int n) = 0;
     virtual void reset() = 0;
