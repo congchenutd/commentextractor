@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>818</width>
-    <height>496</height>
+    <width>448</width>
+    <height>329</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Comment extractor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0" colspan="9">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
      <widget class="QSplitter" name="splitter">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -40,7 +40,7 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QTableView" name="tvTagDetail">
+      <widget class="QTableView" name="tvInstances">
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
        </property>
@@ -73,71 +73,6 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="8">
-     <widget class="QSpinBox" name="sbRandomPickSize">
-      <property name="maximum">
-       <number>999999</number>
-      </property>
-      <property name="value">
-       <number>100</number>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="7">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Random pick</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="6">
-     <widget class="QSpinBox" name="sbRemoveSmallSize">
-      <property name="maximum">
-       <number>999999</number>
-      </property>
-      <property name="value">
-       <number>5</number>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="5">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Remove smaller than</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
-     <widget class="QLineEdit" name="leTagFilter"/>
-    </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Tag filter</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="leNameFilter">
-      <property name="text">
-       <string>*.c;*.h;*.cc;*.cpp;*.hpp;*.java</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Name filter</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="4">
-     <widget class="QCheckBox" name="cbRegEx">
-      <property name="text">
-       <string>RegEx</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -145,16 +80,17 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>818</width>
-     <height>26</height>
+     <width>448</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen"/>
+    <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuOperation">
     <property name="title">
@@ -172,6 +108,12 @@
    <property name="windowTitle">
     <string>Toolbar</string>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>48</width>
+     <height>32</height>
+    </size>
+   </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
@@ -181,19 +123,23 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpen"/>
+   <addaction name="actionLoad"/>
    <addaction name="actionSave"/>
    <addaction name="actionExtract"/>
    <addaction name="actionPick"/>
    <addaction name="actionDelete"/>
+   <addaction name="actionSettings"/>
   </widget>
-  <action name="actionOpen">
+  <action name="actionLoad">
    <property name="icon">
     <iconset resource="Resource.qrc">
      <normaloff>:/Images/Open.png</normaloff>:/Images/Open.png</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Load</string>
+   </property>
+   <property name="toolTip">
+    <string>Load</string>
    </property>
   </action>
   <action name="actionSave">
@@ -233,6 +179,15 @@
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="Resource.qrc">
+     <normaloff>:/Images/Settings.png</normaloff>:/Images/Settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

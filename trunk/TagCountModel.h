@@ -4,7 +4,7 @@
 #include <QStandardItemModel>
 #include <QMap>
 
-class TagDetailModel;
+class TagInstanceModel;
 class TextBlock;
 class TagCounter;
 
@@ -14,26 +14,31 @@ class TagCountModel : public QStandardItemModel
 {
 public:
     TagCountModel(QObject* parent = 0, TagCounter* counter = 0);
-    void setCounter(TagCounter* counter) { _counter = counter; }
+
+    QString getProjectPath() const { return _projectPath; }
+    void setProjectPath(const QString& projectPath);
+
     void addTag(const QString& tag, const TextBlock& block);
-    TagDetailModel* getDetail(const QString& tag) const;
+    TagInstanceModel* getInstanceModel(const QString& tag) const;
     void clear();
     void pick(int n);          // randomly pick n instances from each tag
     void removeSmall(int n);   // remove tags with less than n instances
-    void removeTag(const QString& tag);
+    void remove(const QString& tag);
 
-    void save(const QString& dirPath, const QString& sourcePath);
+    QString getKeyword(int row) const;        // the keyword in row
+    int     getCount  (int row) const;        // the tag count in row
+
+    void save(const QString& dirPath);
     void load(const QString& dirPath);
 
 private:
     int findTag(const QString& tag) const;    // returns the row of the tag
-    QString getKeyword(int row) const;        // the keyword in row
-    int     getCount  (int row) const;        // the tag count in row
-    void removeRow(int row);
+    void remove(int row);
 
 private:
-    QMap<QString, TagDetailModel*> _details;  // keyword->detail model
-    TagCounter*                    _counter;
+    QMap<QString, TagInstanceModel*> _instanceModels;  // keyword->instance model
+    TagCounter* _counter;
+    QString     _projectPath;
 
 public:
     enum {COL_TAG, COL_COUNT};

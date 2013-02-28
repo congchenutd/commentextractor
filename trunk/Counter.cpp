@@ -3,7 +3,7 @@
 #include <QTextDocument>
 #include <QLabel>
 
-LabelUpdater::LabelUpdater(QLabel *label, const QString &message)
+LabelUpdater::LabelUpdater(QLabel* label, const QString& message)
     : _count(0), _label(label), _message(message)
 {}
 

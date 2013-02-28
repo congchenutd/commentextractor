@@ -8,7 +8,7 @@
 
 class QString;
 
-// Extractor extracts substrings from a file
+// Extracts substrings from a file
 // the substrings are caught by a regular expression
 // implements IRunnableOnFile
 class Extractor : public IRunnableOnFile

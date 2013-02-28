@@ -3,13 +3,14 @@
 
 #include "ui_MainWindow.h"
 #include "Runnable.h"
+#include "DlgSettings.h"
 
 class QProgressBar;
 class QDirIterator;
 class Extractor;
 class TagFilter;
 class TagCountModel;
-class TagDetailModel;
+class TagInstanceModel;
 class TagCounter;
 
 class MainWindow : public QMainWindow
@@ -25,35 +26,37 @@ protected:
 private slots:
     void onExtract();
     void onPick();
-    void onOpen();
+    void onLoad();
     void onSave();
     void onTagClicked(const QModelIndex& idx);
+    void onTagInstanceClicked(const QModelIndex& idx);
     void onDeleteTag();
-    void onTagDetailClicked(const QModelIndex& idx);
+    void onSettings();
 
 private:
     void loadSettings();
     void saveSettings();
 
-    QStringList getNameFilter()      const { return ui.leNameFilter->text().split(";"); }
-    QString     getTagFilter()       const { return ui.leTagFilter->text(); }
-    int         getRandomPickSize()  const { return ui.sbRandomPickSize->value(); }
-    int         getRemoveSmallSize() const { return ui.sbRemoveSmallSize->value(); }
-    bool        useRegEx()           const { return ui.cbRegEx->isChecked(); }
+    QStringList getNameFilter()      const { return _settings.getNameFilter(); }
+    QString     getTagFilter()       const { return _settings.getTagFilter(); }
+    int         getRandomPickSize()  const { return _settings.getRandomPickSize(); }
+    int         getRemoveSmallSize() const { return _settings.getRemoveSmallSize(); }
+    bool        useRegEx()           const { return _settings.useRegEx(); }
 
     QDirIterator* createIterator() const;
     void iterate(QDirIterator* iterator, Actors& actors);   // iterate files and apply actions
     int countFiles();
 
-    void setCurrentDetailModel(TagDetailModel* model);
+    void setCurrentInstanceModel(TagInstanceModel* model);
+    void setProjectPath(const QString& projectPath);
 
 private:
     Ui::MainWindow ui;
 
-    QString _projectPath;
-    TagCountModel*  _tagCountModel;
-    TagDetailModel* _tagDetailModel;
-    TagCounter*     _tagCounter;
+    Settings         _settings;
+    TagCountModel*    _modelCount;
+    TagInstanceModel* _modelInstances;
+    TagCounter*       _tagCounter;
     
     QLabel* _labelFileCount;
     QLabel* _labelLineCount;
