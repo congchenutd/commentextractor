@@ -5,6 +5,7 @@
 #include <QTextStream>
 #include <QFile>
 #include <QDir>
+#include <QApplication>
 
 TagCountModel::TagCountModel(QObject* parent, TagCounter* counter)
     : QStandardItemModel(parent), _counter(counter)
@@ -149,6 +150,7 @@ void TagCountModel::load(const QString& dirPath)
                                                            _projectPath);
             foreach(const TextBlock& block, blocks)
                 addTag(tag, block);
+            qApp->processEvents();
         }
     }
 }
