@@ -1,6 +1,7 @@
 #include "TextBlock.h"
 #include <QTextStream>
-#include <QDebug>
+#include <QFile>
+#include <QRegularExpression>
 
 void TextBlock::setFilePath(const QString& filePath)
 {
@@ -15,12 +16,13 @@ QString TextBlock::getPackage(const QString& filePath) const
     if(file.open(QFile::ReadOnly))
     {
         QTextStream is(&file);
-        while(!is.atEnd())
-        {
-            QString line = is.readLine();
-            if(line.startsWith("package"))
-                result = line.remove("package").simplified();
-        }
+        QString content = is.readAll();
+
+        QRegularExpression re("package\\s+([\\w|\\.])+");
+        QRegularExpressionMatch match = re.match(content);
+        if(match.hasMatch())
+            result = match.captured(0);
     }
+
     return result;
 }
