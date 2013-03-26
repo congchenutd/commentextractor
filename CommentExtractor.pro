@@ -24,7 +24,9 @@ SOURCES += \
     TagDetailModel.cpp \
     Highlighter.cpp \
     MainWindow.cpp \
-    DlgSettings.cpp
+    DlgSettings.cpp \
+    ModuleModel.cpp \
+    TextBlock.cpp
 
 HEADERS  += \
     Extractor.h \
@@ -39,7 +41,8 @@ HEADERS  += \
     TagDetailModel.h \
     Highlighter.h \
     MainWindow.h \
-    DlgSettings.h
+    DlgSettings.h \
+    ModuleModel.h
 
 FORMS    += \
     MainWindow.ui \
