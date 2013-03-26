@@ -7,7 +7,7 @@ Settings::Settings(const QString& fileName)
 
 QStringList Settings::getNameFilter()       const { return getNameFilterString().split(";"); }
 QString     Settings::getNameFilterString() const { return value("NameFilter").toString(); }
-QString     Settings::getTagFilter()        const { return value("TagFilter") .toString(); }
+QString     Settings::getContentFilter()    const { return value("TagFilter") .toString(); }
 int         Settings::getRandomPickSize()   const { return value("RandomPickSize") .toInt(); }
 int         Settings::getRemoveSmallSize()  const { return value("RemoveSmallSize").toInt(); }
 bool        Settings::useRegEx()            const { return value("UseRegEx").toBool(); }
@@ -57,7 +57,7 @@ void DlgSettings::loadSettings()
 {
     Settings settings;
     ui.leNameFilter     ->setText   (settings.getNameFilterString());
-    ui.leTagFilter      ->setText   (settings.getTagFilter());
+    ui.leContentFilter  ->setText   (settings.getContentFilter());
     ui.sbRandomPickSize ->setValue  (settings.getRandomPickSize());
     ui.sbRemoveSmallSize->setValue  (settings.getRemoveSmallSize());
     ui.cbRegEx          ->setChecked(settings.useRegEx());
@@ -70,7 +70,7 @@ void DlgSettings::saveSettings()
 {
     Settings settings;
     settings.setNameFilterString(getNameFilterString());
-    settings.setTagFilter       (getTagFilter());
+    settings.setTagFilter       (getContentFilter());
     settings.setRandomPickSize  (getRandomPickSize());
     settings.setRemoveSmallSize (getRemoveSmallSize());
     settings.setUseRegEx        (useRegEx());
@@ -79,7 +79,7 @@ void DlgSettings::saveSettings()
 }
 
 QString DlgSettings::getNameFilterString() const { return ui.leNameFilter->text().simplified(); }
-QString DlgSettings::getTagFilter()        const { return ui.leTagFilter->text(); }
+QString DlgSettings::getContentFilter()    const { return ui.leContentFilter->text(); }
 int     DlgSettings::getRandomPickSize()   const { return ui.sbRandomPickSize->value(); }
 int     DlgSettings::getRemoveSmallSize()  const { return ui.sbRemoveSmallSize->value(); }
 bool    DlgSettings::useRegEx()            const { return ui.cbRegEx->isChecked(); }

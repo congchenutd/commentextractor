@@ -38,7 +38,7 @@ private:
     void saveSettings();
 
     QStringList getNameFilter()      const { return _settings.getNameFilter(); }
-    QString     getTagFilter()       const { return _settings.getTagFilter(); }
+    QString     getContentFilter()   const { return _settings.getContentFilter(); }
     int         getRandomPickSize()  const { return _settings.getRandomPickSize(); }
     int         getRemoveSmallSize() const { return _settings.getRemoveSmallSize(); }
     bool        useRegEx()           const { return _settings.useRegEx(); }

@@ -11,15 +11,20 @@ public:
         : _content(content), _filePath(filePath), _lineNumber(lineNumber) {}
 
     QString getContent()    const { return _content;    }
+    QString getPackage()    const { return _package;    }
     QString getFilePath()   const { return _filePath;   }
     int     getLineNumber() const { return _lineNumber; }
 
     void setContent   (const QString& content)  { _content    = content;    }
-    void setFilePath  (const QString& filePath) { _filePath   = filePath;   }
+    void setFilePath  (const QString& filePath);
     void setLineNumber(int lineNumber)          { _lineNumber = lineNumber; }
 
 private:
+    QString getPackage(const QString& filePath) const;
+
+private:
     QString _content;
+    QString _package;    // equal to filePath for C/C++
     QString _filePath;
     int     _lineNumber;
 };

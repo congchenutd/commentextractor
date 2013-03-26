@@ -14,13 +14,13 @@ class QString;
 class Extractor : public IRunnableOnFile
 {
 public:
-    Extractor(const QString& pattern);   // RegEx pattern
+    Extractor(const QString& pattern);
     QList<TextBlock> getResult() const { return _result; }
 
     void run(const QString& filePath);  // run extractor on the file with filePath
 
 private:
-    // extract one matched substring from text, starting from cursor, filePath is the file containing the text
+    // extract one matching substring from text, starting from cursor, filePath is the file containing the text
     // cursor will be updated after each call
     TextBlock extractOne(const QString& text, const QString& filePath, int& cursor) const;
 
@@ -28,7 +28,7 @@ private:
     int getLineNumber(const QString& text, int cursor) const;
 
 private:
-    QString _pattern;
+    QString _pattern;               // RegEx pattern
     QList<TextBlock> _result;
 };
 

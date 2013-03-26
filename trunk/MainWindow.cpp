@@ -85,7 +85,7 @@ void MainWindow::onExtract()
     // extractor and filter
     Extractor extractor("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*");
     TagFilter tagFilter(&extractor, _modelCount);
-    tagFilter.setFilter(getTagFilter(), useRegEx());
+    tagFilter.setFilter(getContentFilter(), useRegEx());
 
     // apply actors on the files
     iterate(createIterator(), Actors() << &tagFilter << &fileCounter

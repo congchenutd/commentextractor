@@ -13,7 +13,7 @@ public:
 
     QString     getNameFilterString() const;
     QStringList getNameFilter()       const;
-    QString     getTagFilter()        const;
+    QString     getContentFilter()    const;
     int         getRandomPickSize()   const;
     int         getRemoveSmallSize()  const;
     bool        useRegEx()            const;
@@ -40,7 +40,7 @@ public:
     void accept();
 
     QString getNameFilterString() const;
-    QString getTagFilter()        const;
+    QString getContentFilter()        const;
     int     getRandomPickSize()   const;
     int     getRemoveSmallSize()  const;
     bool    useRegEx()            const;
