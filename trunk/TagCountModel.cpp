@@ -46,7 +46,7 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
         int lastRow = detailModel->rowCount();
         detailModel->insertRow(lastRow);
         detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_FILEPATH), block.getFilePath());
-        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_LINENUM),     block.getLineNumber());
+        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_LINENUM),  block.getLineNumber());
         detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_CONTENT),  block.getContent());
     }
 
@@ -153,6 +153,11 @@ void TagCountModel::load(const QString& dirPath)
             qApp->processEvents();
         }
     }
+}
+
+void TagCountModel::exportToFile(const QString& filePath)
+{
+
 }
 
 int TagCountModel::findTag(const QString& tag) const

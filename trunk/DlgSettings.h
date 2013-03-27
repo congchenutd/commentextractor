@@ -20,6 +20,7 @@ public:
     QFont       getUIFont()           const;
     QFont       getEditorFont()       const;
     QByteArray  getSplitterState()    const;
+    QString     getLastPath()         const;
 
     void setNameFilterString(const QString& filter);
     void setTagFilter       (const QString& filter);
@@ -29,6 +30,7 @@ public:
     void setUIFont          (const QFont& font);
     void setEditorFont      (const QFont& font);
     void setSplitterState   (const QByteArray& state);
+    void setLastPath        (const QString& path);
 };
 
 class DlgSettings : public QDialog

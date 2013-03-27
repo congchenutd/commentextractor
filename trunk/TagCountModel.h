@@ -30,6 +30,7 @@ public:
 
     void save(const QString& dirPath);
     void load(const QString& dirPath);
+    void exportToFile(const QString& filePath);
 
 private:
     int findTag(const QString& tag) const;    // returns the row of the tag

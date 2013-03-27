@@ -20,20 +20,6 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTableView" name="tvModules">
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
       <widget class="QTableView" name="tvTagCount">
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
@@ -89,7 +75,7 @@
      <x>0</x>
      <y>0</y>
      <width>471</width>
-     <height>29</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -133,6 +119,7 @@
    </attribute>
    <addaction name="actionLoad"/>
    <addaction name="actionSave"/>
+   <addaction name="actionExport"/>
    <addaction name="actionExtract"/>
    <addaction name="actionPick"/>
    <addaction name="actionDelete"/>
@@ -196,6 +183,15 @@
    </property>
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="Resource.qrc">
+     <normaloff>:/Images/Export.png</normaloff>:/Images/Export.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export</string>
    </property>
   </action>
  </widget>

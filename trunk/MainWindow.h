@@ -31,6 +31,7 @@ private slots:
     void onTagClicked(const QModelIndex& idx);
     void onTagInstanceClicked(const QModelIndex& idx);
     void onDeleteTag();
+    void onExport();
     void onSettings();
 
 private:

@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui.actionSave,     SIGNAL(triggered()), this, SLOT(onSave()));
     connect(ui.actionDelete,   SIGNAL(triggered()), this, SLOT(onDeleteTag()));
     connect(ui.actionSettings, SIGNAL(triggered()), this, SLOT(onSettings()));
+    connect(ui.actionExport,   SIGNAL(triggered()), this, SLOT(onExport()));
     connect(ui.tvTagCount,  SIGNAL(clicked(QModelIndex)), this, SLOT(onTagClicked(QModelIndex)));
     connect(ui.tvInstances, SIGNAL(clicked(QModelIndex)), this, SLOT(onTagInstanceClicked(QModelIndex)));
     connect(ui.tvTagCount->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
@@ -169,6 +170,17 @@ void MainWindow::onDeleteTag()
         toBeRemoved << _modelCount->getKeyword(idx.row());
     foreach(const QString& tag, toBeRemoved)
         _modelCount->remove(tag);
+}
+
+void MainWindow::onExport()
+{
+    Settings settings;
+
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Export"),
+                                                    settings.getLastPath(),
+                                                    tr("CSV files (*.csv)"));
+    if(!filePath.isEmpty())
+        _modelCount->exportToFile(filePath);
 }
 
 void MainWindow::onSettings()
