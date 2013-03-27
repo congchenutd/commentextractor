@@ -19,8 +19,6 @@ public:
     void setLineNumber(int lineNumber)          { _lineNumber = lineNumber; }
 
 private:
-
-private:
     QString _content;
     QString _filePath;
     int     _lineNumber;

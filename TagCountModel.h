@@ -3,6 +3,7 @@
 
 #include <QStandardItemModel>
 #include <QMap>
+#include <QHash>
 
 class TagInstanceModel;
 class TextBlock;
@@ -37,9 +38,10 @@ private:
     void remove(int row);
 
 private:
-    QMap<QString, TagInstanceModel*> _instanceModels;  // keyword->instance model
+    QMap<QString, TagInstanceModel*> _keyword2Model;
     TagCounter* _counter;
     QString     _projectPath;
+    QHash<QString, int> _tag2Row;
 
 public:
     enum {COL_TAG, COL_COUNT};
@@ -59,6 +61,11 @@ public:
 private:
     int findKeywordCol(const QString& keyword)     const;
     int findPackageRow(const QString& packageName) const;
+
+private:
+    QHash<QString, int> _package2Row;
+    QHash<QString, int> _keyword2Col;
+
 };
 
 #endif // TAGCOUNTMODEL_H

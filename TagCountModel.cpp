@@ -31,7 +31,8 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
         setData(index(lastRow, COL_COUNT), 1);
 
         detailModel = new TagInstanceModel(tag, this);
-        _instanceModels.insert(tag, detailModel);
+        _keyword2Model.insert(tag, detailModel);
+        _tag2Row.insert(tag, lastRow);
     }
     else           // existing tag
     {
@@ -55,20 +56,20 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
 }
 
 TagInstanceModel* TagCountModel::getInstanceModel(const QString& tag) const {
-    return _instanceModels.contains(tag) ? _instanceModels[tag] : 0;
+    return _keyword2Model.contains(tag) ? _keyword2Model[tag] : 0;
 }
 
 void TagCountModel::clear()
 {
     removeRows(0, rowCount());
-    foreach(TagInstanceModel* detailModel, _instanceModels)
+    foreach(TagInstanceModel* detailModel, _keyword2Model)
         detailModel->deleteLater();
-    _instanceModels.clear();
+    _keyword2Model.clear();
 }
 
 void TagCountModel::pick(int n)
 {
-    for(QMap<QString, TagInstanceModel*>::Iterator it = _instanceModels.begin(); it != _instanceModels.end(); ++it)
+    for(QMap<QString, TagInstanceModel*>::Iterator it = _keyword2Model.begin(); it != _keyword2Model.end(); ++it)
     {
         TagInstanceModel* newModel = it.value()->pick(n);  // a new model containing n picked instances
         if(newModel != it.value())
@@ -102,12 +103,13 @@ void TagCountModel::remove(int row)
 
     QString tag = getKeyword(row);
     getInstanceModel(tag)->deleteLater();
-    _instanceModels.remove(tag);
+    _keyword2Model.remove(tag);
 
     if(_counter != 0)
         _counter->decrease(getCount(row));
 
     removeRow(row);
+    _tag2Row.remove(tag);
 }
 
 void TagCountModel::save(const QString& dirPath)
@@ -157,8 +159,8 @@ void TagCountModel::load(const QString& dirPath)
 
 void TagCountModel::exportToFile(const QString& filePath)
 {
-    TagDistributionModel* distributionModel = new TagDistributionModel(_instanceModels.keys());
-    foreach(TagInstanceModel* instanceModel, _instanceModels)
+    TagDistributionModel* distributionModel = new TagDistributionModel(_keyword2Model.keys());
+    foreach(TagInstanceModel* instanceModel, _keyword2Model)
     {
         QList<TextBlock> textBlocks = instanceModel->getTextBlocks();
         foreach(const TextBlock& textBlock, textBlocks)
@@ -168,10 +170,8 @@ void TagCountModel::exportToFile(const QString& filePath)
     distributionModel->exportToFile(filePath);
 }
 
-int TagCountModel::findTag(const QString& tag) const
-{
-    QModelIndexList indexes = match(index(0, COL_TAG), Qt::DisplayRole, tag, 1, Qt::MatchExactly);
-    return indexes.isEmpty() ? -1 : indexes.front().row();
+int TagCountModel::findTag(const QString& tag) const {
+    return _tag2Row.contains(tag) ? _tag2Row[tag] : -1;
 }
 
 QString TagCountModel::getKeyword(int row) const {
@@ -188,7 +188,10 @@ TagDistributionModel::TagDistributionModel(const QStringList& keywords, QObject*
 {
     setColumnCount(keywords.size());
     for(int col = 0; col < columnCount(); ++col)
+    {
         setHeaderData(col, Qt::Horizontal, keywords.at(col));
+        _keyword2Col.insert(keywords.at(col), col);
+    }
 }
 
 void TagDistributionModel::addCount(const QString& packageName, const QString& keyword)
@@ -203,6 +206,7 @@ void TagDistributionModel::addCount(const QString& packageName, const QString& k
         row = rowCount();
         insertRow(row);
         setHeaderData(row, Qt::Vertical, packageName);
+        _package2Row.insert(packageName, row);
     }
 
     setData(index(row, col), data(index(row, col)).toInt() + 1);
@@ -229,18 +233,10 @@ void TagDistributionModel::exportToFile(const QString& filePath)
     }
 }
 
-int TagDistributionModel::findKeywordCol(const QString& keyword) const
-{
-    for(int col = 0; col < columnCount(); ++col)
-        if(headerData(col, Qt::Horizontal).toString() == keyword)
-            return col;
-    return -1;
+int TagDistributionModel::findKeywordCol(const QString& keyword) const {
+    return _keyword2Col.contains(keyword) ? _keyword2Col[keyword] : -1;
 }
 
-int TagDistributionModel::findPackageRow(const QString& packageName) const
-{
-    for(int row = 0; row < rowCount(); ++row)
-        if(headerData(row, Qt::Vertical).toString() == packageName)
-            return row;
-    return -1;
+int TagDistributionModel::findPackageRow(const QString& packageName) const {
+    return _package2Row.contains(packageName) ? _package2Row[packageName] : -1;
 }
