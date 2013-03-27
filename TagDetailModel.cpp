@@ -31,12 +31,7 @@ TagInstanceModel* TagInstanceModel::pick(int n)
         int row = qrand() % rowCount();   // random row
         if(!pickedRow.contains(row))      // copy row
         {
-            int lastRow = result->rowCount();
-            result->insertRow(lastRow);
-            result->setData(result->index(lastRow, COL_FILEPATH), data(index(row, COL_FILEPATH)));
-            result->setData(result->index(lastRow, COL_LINENUM),  data(index(row, COL_LINENUM)));
-            result->setData(result->index(lastRow, COL_CONTENT),  data(index(row, COL_CONTENT)));
-
+            result->addTextBlock(getTextBlock(row));
             pickedRow.insert(row);
             ++i;
         }
@@ -93,8 +88,32 @@ QString TagInstanceModel::getContent(int row) const {
     return data(index(row, COL_CONTENT)).toString();
 }
 
+TextBlock TagInstanceModel::getTextBlock(int row) const {
+    return TextBlock(getContent(row), getFilePath(row), getLineNum(row));
+}
+
+QList<TextBlock> TagInstanceModel::getTextBlocks() const
+{
+    QList<TextBlock> result;
+    for(int row = 0; row < rowCount(); ++row)
+        result << getTextBlock(row);
+    return result;
+}
+
+void TagInstanceModel::setTextBlock(int row, const TextBlock& textBlock)
+{
+    if(row < 0 || row >= rowCount())
+        return;
+    setData(index(row, COL_CONTENT),  textBlock.getContent());
+    setData(index(row, COL_FILEPATH), textBlock.getFilePath());
+    setData(index(row, COL_LINENUM),  textBlock.getLineNumber());
+}
+
 void TagInstanceModel::addTextBlock(const TextBlock& textBlock)
 {
+    int lastRow = rowCount();
+    insertRow(lastRow);
+    setTextBlock(lastRow, textBlock);
 }
 
 // do not use a single return to separate lines, because some tag contents contain returns

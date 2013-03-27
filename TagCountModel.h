@@ -45,4 +45,20 @@ public:
     enum {COL_TAG, COL_COUNT};
 };
 
+
+// represent the distribution of tags over the packages
+// row is package, col is keyword
+class TagDistributionModel : public QStandardItemModel
+{
+public:
+    TagDistributionModel(const QStringList& keywords, QObject* parent = 0);
+
+    void addCount(const QString& packageName, const QString& keyword);
+    void exportToFile(const QString& filePath);
+
+private:
+    int findKeywordCol(const QString& keyword)     const;
+    int findPackageRow(const QString& packageName) const;
+};
+
 #endif // TAGCOUNTMODEL_H

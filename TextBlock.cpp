@@ -3,6 +3,12 @@
 #include <QFile>
 #include <QRegularExpression>
 
+TextBlock::TextBlock(const QString& content, const QString& filePath, int lineNumber)
+    : _content(content), _lineNumber(lineNumber)
+{
+    setFilePath(filePath);
+}
+
 void TextBlock::setFilePath(const QString& filePath)
 {
     _filePath = filePath;
@@ -24,5 +30,5 @@ QString TextBlock::getPackage(const QString& filePath) const
             result = match.captured(0);
     }
 
-    return result;
+    return filePath;
 }
