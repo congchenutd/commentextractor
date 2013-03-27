@@ -14,10 +14,13 @@ public:
     QString getKeyword() const { return _keyword; }
 
     // for convenience
+    QString getContent (int row) const;
     QString getFilePath(int row) const;
     int     getLineNum (int row) const;
-    QString getContent (int row) const;
 
+    TextBlock        getTextBlock(int row) const;
+    QList<TextBlock> getTextBlocks()       const;
+    void setTextBlock(int row, const TextBlock& textBlock);
     void addTextBlock(const TextBlock& textBlock);
 
     static QList<TextBlock> load(const QString& filePath, const QString& projectPath);

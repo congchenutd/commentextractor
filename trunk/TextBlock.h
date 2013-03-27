@@ -7,8 +7,7 @@
 class TextBlock
 {
 public:
-    TextBlock(const QString& content = QString(), const QString& filePath = QString(), int lineNumber = -1)
-        : _content(content), _filePath(filePath), _lineNumber(lineNumber) {}
+    TextBlock(const QString& content = QString(), const QString& filePath = QString(), int lineNumber = -1);
 
     QString getContent()    const { return _content;    }
     QString getPackage()    const { return _package;    }
@@ -24,7 +23,7 @@ private:
 
 private:
     QString _content;
-    QString _package;    // equal to filePath for C/C++
+    QString _package;
     QString _filePath;
     int     _lineNumber;
 };

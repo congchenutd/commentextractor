@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QDir>
 #include <QApplication>
+#include <QTableView>
 
 TagCountModel::TagCountModel(QObject* parent, TagCounter* counter)
     : QStandardItemModel(parent), _counter(counter)
@@ -147,7 +148,7 @@ void TagCountModel::load(const QString& dirPath)
             // load tag detail
             QString tag = sections.at(COL_TAG);
             QList<TextBlock> blocks = TagInstanceModel::load(dirPath + QDir::separator() + tag + ".csv",
-                                                           _projectPath);
+                                                             _projectPath);
             foreach(const TextBlock& block, blocks)
                 addTag(tag, block);
             qApp->processEvents();
@@ -157,7 +158,19 @@ void TagCountModel::load(const QString& dirPath)
 
 void TagCountModel::exportToFile(const QString& filePath)
 {
+    TagDistributionModel* distributionModel = new TagDistributionModel(_instanceModels.keys());
+    foreach(TagInstanceModel* instanceModel, _instanceModels)
+    {
+        QList<TextBlock> textBlocks = instanceModel->getTextBlocks();
+        foreach(const TextBlock& textBlock, textBlocks)
+            distributionModel->addCount(textBlock.getPackage(), instanceModel->getKeyword());
+    }
 
+    distributionModel->exportToFile(filePath);
+
+//    QTableView* view = new QTableView;
+//    view->setModel(distributionModel);
+//    view->show();
 }
 
 int TagCountModel::findTag(const QString& tag) const
@@ -172,4 +185,67 @@ QString TagCountModel::getKeyword(int row) const {
 
 int TagCountModel::getCount(int row) const {
     return data(index(row, COL_COUNT)).toInt();
+}
+
+///////////////////////////////////////////////////////////////////////
+TagDistributionModel::TagDistributionModel(const QStringList& keywords, QObject* parent)
+    : QStandardItemModel(parent)
+{
+    setColumnCount(keywords.size());
+    for(int col = 0; col < columnCount(); ++col)
+        setHeaderData(col, Qt::Horizontal, keywords.at(col));
+}
+
+void TagDistributionModel::addCount(const QString& packageName, const QString& keyword)
+{
+    int col = findKeywordCol(keyword);
+    if(col == -1)
+        return;
+
+    int row = findPackageRow(packageName);
+    if(row == -1)       // new row
+    {
+        row = rowCount();
+        insertRow(row);
+        setHeaderData(row, Qt::Vertical, packageName);
+    }
+
+    setData(index(row, col), data(index(row, col)).toInt() + 1);
+}
+
+void TagDistributionModel::exportToFile(const QString& filePath)
+{
+    QFile file(filePath);
+    if(!file.open(QFile::WriteOnly))
+        return;
+
+    // first row is the table header
+    QTextStream os(&file);
+    for(int col = 0; col < columnCount(); ++col)
+        os << "," << headerData(col, Qt::Horizontal).toString();
+    os << "\r\n";
+
+    for(int row = 0; row < rowCount(); ++row)
+    {
+        os << headerData(row, Qt::Vertical).toString() << ",";  // vertical header
+        for(int col = 0; col < columnCount(); ++col)
+            os << data(index(row, col)).toInt() << ",";
+        os << "\r\n";
+    }
+}
+
+int TagDistributionModel::findKeywordCol(const QString& keyword) const
+{
+    for(int col = 0; col < columnCount(); ++col)
+        if(headerData(col, Qt::Horizontal).toString() == keyword)
+            return col;
+    return -1;
+}
+
+int TagDistributionModel::findPackageRow(const QString& packageName) const
+{
+    for(int row = 0; row < rowCount(); ++row)
+        if(headerData(row, Qt::Vertical).toString() == packageName)
+            return row;
+    return -1;
 }
