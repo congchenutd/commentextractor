@@ -6,7 +6,6 @@
 #include <QFile>
 #include <QDir>
 #include <QApplication>
-#include <QTableView>
 
 TagCountModel::TagCountModel(QObject* parent, TagCounter* counter)
     : QStandardItemModel(parent), _counter(counter)
@@ -167,10 +166,6 @@ void TagCountModel::exportToFile(const QString& filePath)
     }
 
     distributionModel->exportToFile(filePath);
-
-//    QTableView* view = new QTableView;
-//    view->setModel(distributionModel);
-//    view->show();
 }
 
 int TagCountModel::findTag(const QString& tag) const

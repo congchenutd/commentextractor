@@ -108,19 +108,25 @@ void MainWindow::onPick()
 
 void MainWindow::onLoad()
 {
-    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to load"), ".");
+    Settings settings;
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to load"), settings.getLastPath());
     if(!folderPath.isEmpty())
     {
         _modelCount->load(folderPath);
         setProjectPath(_modelCount->getProjectPath());  // count model will have loaded project path
+        settings.setLastPath(folderPath);
     }
 }
 
 void MainWindow::onSave()
 {
-    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to save to"), ".");
+    Settings settings;
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to save to"), settings.getLastPath());
     if(!folderPath.isEmpty())
+    {
         _modelCount->save(folderPath);
+        settings.setLastPath(folderPath);
+    }
 }
 
 void MainWindow::onTagClicked(const QModelIndex& idx) {
@@ -175,12 +181,14 @@ void MainWindow::onDeleteTag()
 void MainWindow::onExport()
 {
     Settings settings;
-
     QString filePath = QFileDialog::getSaveFileName(this, tr("Export"),
                                                     settings.getLastPath(),
                                                     tr("CSV files (*.csv)"));
     if(!filePath.isEmpty())
+    {
         _modelCount->exportToFile(filePath);
+        settings.setLastPath(QFileInfo(filePath).path());
+    }
 }
 
 void MainWindow::onSettings()

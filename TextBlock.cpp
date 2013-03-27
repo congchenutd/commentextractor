@@ -4,31 +4,22 @@
 #include <QRegularExpression>
 
 TextBlock::TextBlock(const QString& content, const QString& filePath, int lineNumber)
-    : _content(content), _lineNumber(lineNumber)
-{
-    setFilePath(filePath);
-}
+    : _content(content), _filePath(filePath), _lineNumber(lineNumber)
+{}
 
-void TextBlock::setFilePath(const QString& filePath)
+QString TextBlock::getPackage() const
 {
-    _filePath = filePath;
-    _package  = getPackage(filePath);
-}
-
-QString TextBlock::getPackage(const QString& filePath) const
-{
-    QString result;
-    QFile file(filePath);
+    QFile file(_filePath);
     if(file.open(QFile::ReadOnly))
     {
         QTextStream is(&file);
         QString content = is.readAll();
 
-        QRegularExpression re("package\\s+([\\w|\\.])+");
+        QRegularExpression re("package\\s+(?<name>[\\w|\\.]+);");
         QRegularExpressionMatch match = re.match(content);
         if(match.hasMatch())
-            result = match.captured(0);
+            return match.captured("name");
     }
 
-    return filePath;
+    return _filePath;
 }
