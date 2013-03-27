@@ -18,6 +18,8 @@ public:
     int     getLineNum (int row) const;
     QString getContent (int row) const;
 
+    void addTextBlock(const TextBlock& textBlock);
+
     static QList<TextBlock> load(const QString& filePath, const QString& projectPath);
     void save(const QString& filePath, const QString& projectPath);
 

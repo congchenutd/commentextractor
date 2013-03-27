@@ -11,7 +11,8 @@ QString     Settings::getContentFilter()    const { return value("TagFilter") .t
 int         Settings::getRandomPickSize()   const { return value("RandomPickSize") .toInt(); }
 int         Settings::getRemoveSmallSize()  const { return value("RemoveSmallSize").toInt(); }
 bool        Settings::useRegEx()            const { return value("UseRegEx").toBool(); }
-QByteArray Settings::getSplitterState()     const { return value("SplitterState").toByteArray(); }
+QByteArray  Settings::getSplitterState()    const { return value("SplitterState").toByteArray(); }
+QString     Settings::getLastPath()         const { return value("LastPath").toString(); }
 
 QFont Settings::getUIFont() const
 {
@@ -36,6 +37,7 @@ void Settings::setUseRegEx        (bool useRegEx)         { setValue("UseRegEx",
 void Settings::setUIFont    (const QFont& font) { setValue("UIFont",     font.toString()); }
 void Settings::setEditorFont(const QFont& font) { setValue("EditorFont", font.toString()); }
 void Settings::setSplitterState(const QByteArray& state) { setValue("SplitterState", state); }
+void Settings::setLastPath(const QString& path) { setValue("LastPath", path); }
 
 //////////////////////////////////////////////////////////////////////////////
 DlgSettings::DlgSettings(QWidget *parent) :

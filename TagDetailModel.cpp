@@ -93,5 +93,9 @@ QString TagInstanceModel::getContent(int row) const {
     return data(index(row, COL_CONTENT)).toString();
 }
 
+void TagInstanceModel::addTextBlock(const TextBlock& textBlock)
+{
+}
+
 // do not use a single return to separate lines, because some tag contents contain returns
 QString TagInstanceModel::_lineSeparator = ";;;\r\n";

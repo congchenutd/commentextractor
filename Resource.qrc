@@ -6,5 +6,6 @@
         <file>Images/Find.png</file>
         <file>Images/Delete.png</file>
         <file>Images/Settings.png</file>
+        <file>Images/Export.png</file>
     </qresource>
 </RCC>
