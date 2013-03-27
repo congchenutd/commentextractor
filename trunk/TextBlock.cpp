@@ -21,5 +21,5 @@ QString TextBlock::getPackage() const
             return match.captured("name");
     }
 
-    return _filePath;
+    return "default";
 }

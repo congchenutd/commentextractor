@@ -61,10 +61,13 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::onExtract()
 {
     // get project path
-    QString projectPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to extract"), ".");
+    Settings settings;
+    QString projectPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to extract"),
+                                                            settings.getLastPath());
     if(projectPath.isEmpty())
         return;
 
+    settings.setLastPath(projectPath);
     setProjectPath(projectPath);
     _modelCount->setProjectPath(projectPath);
     _modelCount->clear();
