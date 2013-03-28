@@ -21,6 +21,7 @@ public:
     QFont       getEditorFont()       const;
     QByteArray  getSplitterState()    const;
     QString     getLastPath()         const;
+    bool        getExportByPackage()  const;
 
     void setNameFilterString(const QString& filter);
     void setTagFilter       (const QString& filter);
@@ -31,6 +32,7 @@ public:
     void setEditorFont      (const QFont& font);
     void setSplitterState   (const QByteArray& state);
     void setLastPath        (const QString& path);
+    void setExportByPackage (bool byPackage);
 };
 
 class DlgSettings : public QDialog
@@ -42,12 +44,13 @@ public:
     void accept();
 
     QString getNameFilterString() const;
-    QString getContentFilter()        const;
+    QString getContentFilter()    const;
     int     getRandomPickSize()   const;
     int     getRemoveSmallSize()  const;
     bool    useRegEx()            const;
     QFont   getUIFont()           const;
     QFont   getEditorFont()       const;
+    bool    getExportByPackage()  const;
 
     void setUIFont    (const QFont& font);
     void setEditorFont(const QFont& font);

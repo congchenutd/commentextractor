@@ -13,6 +13,7 @@ int         Settings::getRemoveSmallSize()  const { return value("RemoveSmallSiz
 bool        Settings::useRegEx()            const { return value("UseRegEx").toBool(); }
 QByteArray  Settings::getSplitterState()    const { return value("SplitterState").toByteArray(); }
 QString     Settings::getLastPath()         const { return value("LastPath").toString(); }
+bool        Settings::getExportByPackage()  const { return value("ExportByPackage").toBool(); }
 
 QFont Settings::getUIFont() const
 {
@@ -38,6 +39,7 @@ void Settings::setUIFont    (const QFont& font) { setValue("UIFont",     font.to
 void Settings::setEditorFont(const QFont& font) { setValue("EditorFont", font.toString()); }
 void Settings::setSplitterState(const QByteArray& state) { setValue("SplitterState", state); }
 void Settings::setLastPath(const QString& path) { setValue("LastPath", path); }
+void Settings::setExportByPackage(bool byPackage) { setValue("ExportByPackage", byPackage); }
 
 //////////////////////////////////////////////////////////////////////////////
 DlgSettings::DlgSettings(QWidget *parent) :
@@ -62,10 +64,10 @@ void DlgSettings::loadSettings()
     ui.leContentFilter  ->setText   (settings.getContentFilter());
     ui.sbRandomPickSize ->setValue  (settings.getRandomPickSize());
     ui.sbRemoveSmallSize->setValue  (settings.getRemoveSmallSize());
-    ui.cbRegEx          ->setChecked(settings.useRegEx());
+    ui.checkRegEx       ->setChecked(settings.useRegEx());
+    ui.checkByPackage   ->setChecked(settings.getExportByPackage());
     setUIFont    (settings.getUIFont());
     setEditorFont(settings.getEditorFont());
-
 }
 
 void DlgSettings::saveSettings()
@@ -78,15 +80,17 @@ void DlgSettings::saveSettings()
     settings.setUseRegEx        (useRegEx());
     settings.setUIFont          (getUIFont());
     settings.setEditorFont      (getEditorFont());
+    settings.setExportByPackage (getExportByPackage());
 }
 
 QString DlgSettings::getNameFilterString() const { return ui.leNameFilter->text().simplified(); }
 QString DlgSettings::getContentFilter()    const { return ui.leContentFilter->text(); }
 int     DlgSettings::getRandomPickSize()   const { return ui.sbRandomPickSize->value(); }
 int     DlgSettings::getRemoveSmallSize()  const { return ui.sbRemoveSmallSize->value(); }
-bool    DlgSettings::useRegEx()            const { return ui.cbRegEx->isChecked(); }
+bool    DlgSettings::useRegEx()            const { return ui.checkRegEx->isChecked(); }
 QFont   DlgSettings::getUIFont()           const { return ui.btUIFont->font(); }
 QFont   DlgSettings::getEditorFont()       const { return ui.btEditorFont->font(); }
+bool    DlgSettings::getExportByPackage()  const { return ui.checkByPackage->isChecked(); }
 
 void DlgSettings::setUIFont    (const QFont& font) { ui.btUIFont->setFont(font);     }
 void DlgSettings::setEditorFont(const QFont& font) { ui.btEditorFont->setFont(font); }

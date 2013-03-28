@@ -189,7 +189,7 @@ void MainWindow::onExport()
                                                     tr("CSV files (*.csv)"));
     if(!filePath.isEmpty())
     {
-        _modelCount->exportToFile(filePath);
+        _modelCount->exportToFile(filePath, settings.getExportByPackage());
         settings.setLastPath(QFileInfo(filePath).path());
     }
 }
