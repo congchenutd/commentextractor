@@ -42,13 +42,7 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
 
     // add to the detail model
     if(detailModel != 0)
-    {
-        int lastRow = detailModel->rowCount();
-        detailModel->insertRow(lastRow);
-        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_FILEPATH), block.getFilePath());
-        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_LINENUM),  block.getLineNumber());
-        detailModel->setData(detailModel->index(lastRow, TagInstanceModel::COL_CONTENT),  block.getContent());
-    }
+        detailModel->addTextBlock(block);
 
     if(_counter != 0)
         _counter->increase();

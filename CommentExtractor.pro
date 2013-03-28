@@ -26,7 +26,8 @@ SOURCES += \
     MainWindow.cpp \
     DlgSettings.cpp \
     ModuleModel.cpp \
-    TextBlock.cpp
+    TextBlock.cpp \
+    DistributionModel.cpp
 
 HEADERS  += \
     Extractor.h \
@@ -42,7 +43,8 @@ HEADERS  += \
     Highlighter.h \
     MainWindow.h \
     DlgSettings.h \
-    ModuleModel.h
+    ModuleModel.h \
+    DistributionModel.h
 
 FORMS    += \
     MainWindow.ui \
