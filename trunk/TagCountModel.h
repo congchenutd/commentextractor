@@ -64,7 +64,6 @@ private:
 private:
     QHash<QString, int> _package2Row;
     QHash<QString, int> _keyword2Col;
-
 };
 
 #endif // TAGCOUNTMODEL_H
