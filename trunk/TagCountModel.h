@@ -2,7 +2,6 @@
 #define TAGCOUNTMODEL_H
 
 #include <QStandardItemModel>
-#include <QMap>
 #include <QHash>
 
 class TagInstanceModel;
@@ -38,10 +37,10 @@ private:
     void remove(int row);
 
 private:
-    QMap<QString, TagInstanceModel*> _keyword2Model;
+    typedef QHash<QString, TagInstanceModel*> Keyword2Model;
+    Keyword2Model _keyword2Model;
     TagCounter* _counter;
     QString     _projectPath;
-    QHash<QString, int> _tag2Row;
 
 public:
     enum {COL_TAG, COL_COUNT};

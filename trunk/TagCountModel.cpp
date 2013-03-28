@@ -32,7 +32,6 @@ void TagCountModel::addTag(const QString& tag, const TextBlock& block)
 
         detailModel = new TagInstanceModel(tag, this);
         _keyword2Model.insert(tag, detailModel);
-        _tag2Row.insert(tag, lastRow);
     }
     else           // existing tag
     {
@@ -69,12 +68,12 @@ void TagCountModel::clear()
 
 void TagCountModel::pick(int n)
 {
-    for(QMap<QString, TagInstanceModel*>::Iterator it = _keyword2Model.begin(); it != _keyword2Model.end(); ++it)
+    for(Keyword2Model::Iterator it = _keyword2Model.begin(); it != _keyword2Model.end(); ++it)
     {
         TagInstanceModel* newModel = it.value()->pick(n);  // a new model containing n picked instances
         if(newModel != it.value())
-            it.value()->deleteLater();                   // delete the old
-        *it = newModel;                                  // use the new model
+            it.value()->deleteLater();                     // delete the old
+        *it = newModel;                                    // use the new model
     }
 }
 
@@ -109,7 +108,6 @@ void TagCountModel::remove(int row)
         _counter->decrease(getCount(row));
 
     removeRow(row);
-    _tag2Row.remove(tag);
 }
 
 void TagCountModel::save(const QString& dirPath)
@@ -170,8 +168,10 @@ void TagCountModel::exportToFile(const QString& filePath)
     distributionModel->exportToFile(filePath);
 }
 
-int TagCountModel::findTag(const QString& tag) const {
-    return _tag2Row.contains(tag) ? _tag2Row[tag] : -1;
+int TagCountModel::findTag(const QString& tag) const
+{
+    QModelIndexList indexes = match(index(0, COL_TAG), Qt::DisplayRole, tag, 1, Qt::MatchExactly);
+    return indexes.isEmpty() ? -1 : indexes.front().row();
 }
 
 QString TagCountModel::getKeyword(int row) const {
