@@ -104,6 +104,10 @@ void TagCountModel::remove(int row)
     removeRow(row);
 }
 
+QString TagCountModel::getModuleName(const TextBlock& textBlock, bool byPackage) const {
+    return byPackage ? textBlock.getPackage() : textBlock.getFilePath();
+}
+
 void TagCountModel::save(const QString& dirPath)
 {
     QFile file(dirPath + QDir::separator() + "TagCount.csv");
@@ -149,14 +153,15 @@ void TagCountModel::load(const QString& dirPath)
     }
 }
 
-void TagCountModel::exportToFile(const QString& filePath)
+void TagCountModel::exportToFile(const QString& filePath, bool byPackage)
 {
     TagDistributionModel* distributionModel = new TagDistributionModel(_keyword2Model.keys());
     foreach(TagInstanceModel* instanceModel, _keyword2Model)
     {
         QList<TextBlock> textBlocks = instanceModel->getTextBlocks();
         foreach(const TextBlock& textBlock, textBlocks)
-            distributionModel->addCount(textBlock.getPackage(), instanceModel->getKeyword());
+            distributionModel->addCount(getModuleName(textBlock, byPackage),
+                                        instanceModel->getKeyword());
     }
 
     distributionModel->exportToFile(filePath);

@@ -30,11 +30,12 @@ public:
 
     void save(const QString& dirPath);
     void load(const QString& dirPath);
-    void exportToFile(const QString& filePath);
+    void exportToFile(const QString& filePath, bool byPackage = true);
 
 private:
     int findTag(const QString& tag) const;    // returns the row of the tag
     void remove(int row);
+    QString getModuleName(const TextBlock& textBlock, bool byPackage) const;
 
 private:
     typedef QHash<QString, TagInstanceModel*> Keyword2Model;
