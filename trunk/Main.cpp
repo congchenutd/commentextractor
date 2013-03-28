@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
 {
     qsrand(QTime::currentTime().msec());
     QApplication app(argc, argv);
-    MainWindow w;
-    w.showMaximized();
+    MainWindow wnd;
+    wnd.showMaximized();
     return app.exec();
 }
