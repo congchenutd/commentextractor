@@ -105,7 +105,7 @@ void TagCountModel::remove(int row)
 }
 
 QString TagCountModel::getModuleName(const TextBlock& textBlock, bool byPackage) const {
-    return byPackage ? textBlock.getPackage() : textBlock.getFilePath();
+    return byPackage ? textBlock.getPackageName() : textBlock.getFilePath();
 }
 
 void TagCountModel::save(const QString& dirPath)

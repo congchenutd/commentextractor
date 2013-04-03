@@ -1,47 +1,7 @@
 #include "DlgSettings.h"
+#include "Settings.h"
 #include <QFontDialog>
 
-Settings::Settings(const QString& fileName)
-    : QSettings(fileName, QSettings::IniFormat)
-{}
-
-QStringList Settings::getNameFilter()       const { return getNameFilterString().split(";"); }
-QString     Settings::getNameFilterString() const { return value("NameFilter").toString(); }
-QString     Settings::getContentFilter()    const { return value("TagFilter") .toString(); }
-int         Settings::getRandomPickSize()   const { return value("RandomPickSize") .toInt(); }
-int         Settings::getRemoveSmallSize()  const { return value("RemoveSmallSize").toInt(); }
-bool        Settings::useRegEx()            const { return value("UseRegEx").toBool(); }
-QByteArray  Settings::getSplitterState()    const { return value("SplitterState").toByteArray(); }
-QString     Settings::getLastPath()         const { return value("LastPath").toString(); }
-bool        Settings::getExportByPackage()  const { return value("ExportByPackage").toBool(); }
-
-QFont Settings::getUIFont() const
-{
-    QFont font;
-    font.fromString(value("UIFont").toString());
-    return font;
-}
-
-QFont Settings::getEditorFont() const
-{
-    QFont font;
-    font.fromString(value("EditorFont").toString());
-    return font;
-}
-
-
-void Settings::setNameFilterString(const QString& filter) { setValue("NameFilter", filter); }
-void Settings::setTagFilter       (const QString& filter) { setValue("TagFilter",  filter); }
-void Settings::setRandomPickSize  (int size)              { setValue("RandomPickSize",  size); }
-void Settings::setRemoveSmallSize (int size)              { setValue("RemoveSmallSize", size); }
-void Settings::setUseRegEx        (bool useRegEx)         { setValue("UseRegEx", useRegEx); }
-void Settings::setUIFont    (const QFont& font) { setValue("UIFont",     font.toString()); }
-void Settings::setEditorFont(const QFont& font) { setValue("EditorFont", font.toString()); }
-void Settings::setSplitterState(const QByteArray& state) { setValue("SplitterState", state); }
-void Settings::setLastPath(const QString& path) { setValue("LastPath", path); }
-void Settings::setExportByPackage(bool byPackage) { setValue("ExportByPackage", byPackage); }
-
-//////////////////////////////////////////////////////////////////////////////
 DlgSettings::DlgSettings(QWidget *parent) :
     QDialog(parent)
 {
@@ -65,7 +25,7 @@ void DlgSettings::loadSettings()
     ui.sbRandomPickSize ->setValue  (settings.getRandomPickSize());
     ui.sbRemoveSmallSize->setValue  (settings.getRemoveSmallSize());
     ui.checkRegEx       ->setChecked(settings.useRegEx());
-    ui.checkByPackage   ->setChecked(settings.getExportByPackage());
+    setExportModularity(settings.getExportModularity());
     setUIFont    (settings.getUIFont());
     setEditorFont(settings.getEditorFont());
 }
@@ -80,7 +40,21 @@ void DlgSettings::saveSettings()
     settings.setUseRegEx        (useRegEx());
     settings.setUIFont          (getUIFont());
     settings.setEditorFont      (getEditorFont());
-    settings.setExportByPackage (getExportByPackage());
+    settings.setExportModularity(getExportModularity());
+}
+
+QString DlgSettings::getExportModularity() const
+{
+    return ui.radioClass->isChecked() ? "CLASS" :
+           ui.radioFile->isChecked()  ? "FILE" :
+                                        "PACKAGE";
+}
+
+void DlgSettings::setExportModularity(const QString& modularity)
+{
+    ui.radioClass  ->setChecked(modularity == "CLASS");
+    ui.radioFile   ->setChecked(modularity == "FILE");
+    ui.radioPackage->setChecked(modularity == "PACKAGE");
 }
 
 QString DlgSettings::getNameFilterString() const { return ui.leNameFilter->text().simplified(); }
@@ -90,7 +64,6 @@ int     DlgSettings::getRemoveSmallSize()  const { return ui.sbRemoveSmallSize->
 bool    DlgSettings::useRegEx()            const { return ui.checkRegEx->isChecked(); }
 QFont   DlgSettings::getUIFont()           const { return ui.btUIFont->font(); }
 QFont   DlgSettings::getEditorFont()       const { return ui.btEditorFont->font(); }
-bool    DlgSettings::getExportByPackage()  const { return ui.checkByPackage->isChecked(); }
 
 void DlgSettings::setUIFont    (const QFont& font) { ui.btUIFont->setFont(font);     }
 void DlgSettings::setEditorFont(const QFont& font) { ui.btEditorFont->setFont(font); }

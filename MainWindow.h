@@ -3,10 +3,11 @@
 
 #include "ui_MainWindow.h"
 #include "Runnable.h"
-#include "DlgSettings.h"
+#include "Settings.h"
 
 class QProgressBar;
 class QDirIterator;
+class QLabel;
 class Extractor;
 class TagFilter;
 class TagCountModel;
