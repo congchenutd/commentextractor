@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QFileInfo>
+#include <QDebug>
 
 TextBlock::TextBlock(const QString& content, const QString& filePath, int lineNumber)
     : _content(content), _filePath(filePath), _lineNumber(lineNumber)
@@ -33,7 +34,7 @@ QString TextBlock::getClassName() const
         QTextStream is(&file);
         QString content = is.readAll();
 
-        QRegularExpression re("public\\s+\\w+?class\\s+(?<name>\\w+)");
+        QRegularExpression re("public\\s+\\w+?\\s+class\\s+(?<name>\\w+)");
         QRegularExpressionMatch match = re.match(content);
         if(match.hasMatch())
             return match.captured("name");
@@ -42,6 +43,9 @@ QString TextBlock::getClassName() const
     return QFileInfo(_filePath).fileName();
 }
 
-QString TextBlock::getCompleteClassName() const {
-    return getPackageName() + "." + getClassName();
+QString TextBlock::getCompleteClassName() const
+{
+    QString packageName = getPackageName();
+    QString className   = getClassName();
+    return packageName + "." + className;
 }
