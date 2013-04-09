@@ -30,12 +30,12 @@ public:
 
     void save(const QString& dirPath);
     void load(const QString& dirPath);
-    void exportToFile(const QString& filePath, bool byPackage = true);
+    void exportToFile(const QString& filePath, const QString& modularity);
 
 private:
     int findTag(const QString& tag) const;    // returns the row of the tag
     void remove(int row);
-    QString getModuleName(const TextBlock& textBlock, bool byPackage) const;
+    QString getModuleName(const TextBlock& textBlock, const QString& modularity) const;
 
 private:
     typedef QHash<QString, TagInstanceModel*> Keyword2Model;
@@ -55,7 +55,7 @@ class TagDistributionModel : public QStandardItemModel
 public:
     TagDistributionModel(const QStringList& keywords, QObject* parent = 0);
 
-    void addCount(const QString& packageName, const QString& keyword);
+    void addCount(const QString& moduleName, const QString& keyword);
     void exportToFile(const QString& filePath);
 
 private:

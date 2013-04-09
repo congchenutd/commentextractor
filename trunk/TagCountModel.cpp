@@ -104,8 +104,10 @@ void TagCountModel::remove(int row)
     removeRow(row);
 }
 
-QString TagCountModel::getModuleName(const TextBlock& textBlock, bool byPackage) const {
-    return byPackage ? textBlock.getPackageName() : textBlock.getFilePath();
+QString TagCountModel::getModuleName(const TextBlock& textBlock, const QString& modularity) const {
+    return modularity == "PACKAGE" ? textBlock.getPackageName()
+                                   : modularity == "FILE" ? textBlock.getFilePath()
+                                                          : textBlock.getCompleteClassName();
 }
 
 void TagCountModel::save(const QString& dirPath)
@@ -153,17 +155,16 @@ void TagCountModel::load(const QString& dirPath)
     }
 }
 
-void TagCountModel::exportToFile(const QString& filePath, bool byPackage)
+void TagCountModel::exportToFile(const QString& filePath, const QString& modularity)
 {
     TagDistributionModel* distributionModel = new TagDistributionModel(_keyword2Model.keys());
     foreach(TagInstanceModel* instanceModel, _keyword2Model)
     {
         QList<TextBlock> textBlocks = instanceModel->getTextBlocks();
         foreach(const TextBlock& textBlock, textBlocks)
-            distributionModel->addCount(getModuleName(textBlock, byPackage),
+            distributionModel->addCount(getModuleName(textBlock, modularity),
                                         instanceModel->getKeyword());
     }
-
     distributionModel->exportToFile(filePath);
 }
 
@@ -193,19 +194,21 @@ TagDistributionModel::TagDistributionModel(const QStringList& keywords, QObject*
     }
 }
 
-void TagDistributionModel::addCount(const QString& packageName, const QString& keyword)
+void TagDistributionModel::addCount(const QString& moduleName, const QString& keyword)
 {
+//    qDebug() << moduleName;
+
     int col = findKeywordCol(keyword);
     if(col == -1)
         return;
 
-    int row = findPackageRow(packageName);
+    int row = findPackageRow(moduleName);
     if(row == -1)       // new row
     {
         row = rowCount();
         insertRow(row);
-        setHeaderData(row, Qt::Vertical, packageName);
-        _package2Row.insert(packageName, row);
+        setHeaderData(row, Qt::Vertical, moduleName);
+        _package2Row.insert(moduleName, row);
     }
 
     setData(index(row, col), data(index(row, col)).toInt() + 1);
