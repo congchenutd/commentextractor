@@ -53,12 +53,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui.actionPick,     SIGNAL(triggered()), this, SLOT(onPick()));
     connect(ui.actionLoad,     SIGNAL(triggered()), this, SLOT(onLoad()));
     connect(ui.actionSave,     SIGNAL(triggered()), this, SLOT(onSave()));
-    connect(ui.actionDelete,   SIGNAL(triggered()), this, SLOT(onDeleteTag()));
+    connect(ui.actionDelete,   SIGNAL(triggered()), this, SLOT(onDelete()));
     connect(ui.actionSettings, SIGNAL(triggered()), this, SLOT(onSettings()));
     connect(ui.actionExport,   SIGNAL(triggered()), this, SLOT(onExport()));
     connect(ui.tvTagCount,  SIGNAL(clicked(QModelIndex)), this, SLOT(onTagClicked(QModelIndex)));
     connect(ui.tvInstances, SIGNAL(clicked(QModelIndex)), this, SLOT(onTagInstanceClicked(QModelIndex)));
-    connect(ui.tvComments,  SIGNAL(clicked(QModelIndex)), this, SLOT(onCommentClicked(QModelIndex)));
+    connect(ui.tvComments,  SIGNAL(clicked(QModelIndex)), this, SLOT(onCommentClicked    (QModelIndex)));
     connect(ui.tvTagCount->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(onTagClicked(QModelIndex)));
 }
@@ -73,8 +73,8 @@ void MainWindow::onExtract()
         return;
 
     settings.setLastPath(projectPath);
+    settings.setProjectPath(projectPath);
     setProjectPath(projectPath);
-    _modelCount->setProjectPath(projectPath);
     _modelCount->clear();
 
     // progress actor
@@ -122,7 +122,7 @@ void MainWindow::onLoad()
     if(!folderPath.isEmpty())
     {
         _modelCount->load(folderPath);
-        setProjectPath(_modelCount->getProjectPath());  // count model will have loaded project path
+        setProjectPath(settings.getProjectPath());  // count model will have loaded project path
         settings.setLastPath(folderPath);
     }
 }
@@ -151,47 +151,26 @@ void MainWindow::onTagInstanceClicked(const QModelIndex& idx)
 
     QString filePath = _modelInstances->getFilePath(idx.row());
     int     lineNum  = _modelInstances->getLineNum (idx.row());
-    QFile file(filePath);
-    if(!file.open(QFile::ReadOnly))
-        return;
+    ui.teTag->setFile(filePath, lineNum);
 
     statusBar()->showMessage(filePath);
-
-    // read file
-    QTextStream os(&file);
-    ui.teTag->setPlainText(os.readAll());
-
-    // scroll to bottom so that the line will be shown at the top of the page
-    ui.teTag->verticalScrollBar()->setValue(ui.teTag->verticalScrollBar()->maximum());
-
-    // find the block containing lineNum, and move cursor to the block
-    QTextBlock block = ui.teTag->document()->findBlockByLineNumber(lineNum - 1);
-    QTextCursor cursor(block);
-    ui.teTag->setTextCursor(cursor);
-    ui.teTag->ensureCursorVisible();
-
-    // highlight the line
-    QTextEdit::ExtraSelection highlight;
-    highlight.cursor = cursor;
-    highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
-    highlight.format.setBackground(Qt::yellow);
-    ui.teTag->setExtraSelections(QList<QTextEdit::ExtraSelection>() << highlight);
 }
 
 void MainWindow::onCommentClicked(const QModelIndex& idx)
 {
-    if(idx.isValid())
-        ui.teComment->setPlainText(_modelComment->getComment(idx.row()).getContent());
+    if(!idx.isValid())
+        return;
+
+    TextBlock comment = _modelComment->getComment(idx.row());
+    ui.teComment->setFile(comment.getFilePath(), comment.getLineNumber());
 }
 
-void MainWindow::onDeleteTag()
+void MainWindow::onDelete()
 {
-    QModelIndexList rows = ui.tvTagCount->selectionModel()->selectedRows();
-    QStringList toBeRemoved;
-    foreach(const QModelIndex& idx, rows)
-        toBeRemoved << _modelCount->getKeyword(idx.row());
-    foreach(const QString& tag, toBeRemoved)
-        _modelCount->remove(tag);
+    if(ui.tabWidget->currentIndex() == 1)
+        deleteTags();
+    else
+        deleteComments();
 }
 
 void MainWindow::onExport()
@@ -215,7 +194,7 @@ void MainWindow::onSettings()
 }
 
 QDirIterator* MainWindow::createIterator() const {
-    return new QDirIterator(_modelCount->getProjectPath(), getNameFilter(),
+    return new QDirIterator(Settings().getProjectPath(), getNameFilter(),
                             QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot,
                             QDirIterator::Subdirectories);
 }
@@ -249,6 +228,27 @@ void MainWindow::setCurrentInstanceModel(TagInstanceModel* model)
 
 void MainWindow::setProjectPath(const QString& projectPath) {
     setWindowTitle(tr("CommentExtractor - ") + projectPath);
+}
+
+void MainWindow::deleteTags()
+{
+    QModelIndexList rows = ui.tvTagCount->selectionModel()->selectedRows();
+    QStringList toBeRemoved;
+    foreach(const QModelIndex& idx, rows)
+        toBeRemoved << _modelCount->getKeyword(idx.row());
+    foreach(const QString& tag, toBeRemoved)
+        _modelCount->remove(tag);
+}
+
+void MainWindow::deleteComments()
+{
+    QModelIndexList rows = ui.tvComments->selectionModel()->selectedRows();
+    QList<int> toBeRemoved;
+    foreach(const QModelIndex& idx, rows)
+        toBeRemoved << idx.row();
+    qSort(toBeRemoved.begin(), toBeRemoved.end(), qGreater<int>());
+    foreach(int row, toBeRemoved)
+        _modelComment->removeRow(row);
 }
 
 void MainWindow::loadSettings()

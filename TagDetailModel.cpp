@@ -1,5 +1,6 @@
 #include "TagDetailModel.h"
 #include "TextBlock.h"
+#include "Settings.h"
 #include <QSet>
 #include <QFile>
 #include <QTextStream>
@@ -39,7 +40,7 @@ TagInstanceModel* TagInstanceModel::pick(int n)
     return result;
 }
 
-void TagInstanceModel::save(const QString& filePath, const QString& projectPath)
+void TagInstanceModel::save(const QString& filePath)
 {
     QFile file(filePath);
     if(file.open(QFile::WriteOnly))
@@ -47,8 +48,8 @@ void TagInstanceModel::save(const QString& filePath, const QString& projectPath)
         QTextStream os(&file);
         for(int row = 0; row < rowCount(); ++row)
         {
-            QString filePath = getFilePath(row);                // absolute path
-            filePath.remove(projectPath, Qt::CaseInsensitive);  // to relative path
+            QString filePath = getFilePath(row);                                // absolute path
+            filePath.remove(Settings().getProjectPath(), Qt::CaseInsensitive);  // to relative path
             os << filePath << ","
                << getLineNum(row) << ","
                << getContent(row) << _lineSeparator;

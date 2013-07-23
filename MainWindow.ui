@@ -37,11 +37,14 @@
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
            </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
            <attribute name="horizontalHeaderStretchLastSection">
             <bool>true</bool>
            </attribute>
           </widget>
-          <widget class="QPlainTextEdit" name="teComment"/>
+          <widget class="CommentEdit" name="teComment"/>
          </widget>
         </item>
        </layout>
@@ -87,7 +90,7 @@
             <bool>true</bool>
            </attribute>
           </widget>
-          <widget class="QTextEdit" name="teTag">
+          <widget class="CommentEdit" name="teTag">
            <property name="font">
             <font>
              <family>Consolas</family>
@@ -240,6 +243,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CommentEdit</class>
+   <extends>QTextEdit</extends>
+   <header>CommentEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="Resource.qrc"/>
  </resources>

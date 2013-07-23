@@ -2,6 +2,7 @@
 #define TEXTBLOCK_H
 
 #include <QString>
+#include <QDir>
 
 // A block in a text file, including its content, file path, and line number
 class TextBlock
@@ -10,7 +11,7 @@ public:
     TextBlock(const QString& content = QString(), const QString& filePath = QString(), int lineNumber = -1);
 
     QString getContent()     const { return _content;    }
-    QString getFilePath()    const { return _filePath;   }
+    QString getFilePath()    const { return QDir::toNativeSeparators(_filePath);   }
     int     getLineNumber()  const { return _lineNumber; }
 
     // NOTE: for java only

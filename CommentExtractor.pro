@@ -27,7 +27,8 @@ SOURCES += \
     DlgSettings.cpp \
     TextBlock.cpp \
     Settings.cpp \
-    CommentModel.cpp
+    CommentModel.cpp \
+    CommentEdit.cpp
 
 HEADERS  += \
     Extractor.h \
@@ -44,7 +45,8 @@ HEADERS  += \
     MainWindow.h \
     DlgSettings.h \
     Settings.h \
-    CommentModel.h
+    CommentModel.h \
+    CommentEdit.h
 
 FORMS    += \
     MainWindow.ui \

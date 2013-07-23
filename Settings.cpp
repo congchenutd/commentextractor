@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include <QStringList>
 #include <QFont>
+#include <QDir>
 
 Settings::Settings(const QString& fileName)
     : QSettings(fileName, QSettings::IniFormat)
@@ -13,7 +14,8 @@ int         Settings::getRandomPickSize()   const { return value("RandomPickSize
 int         Settings::getRemoveSmallSize()  const { return value("RemoveSmallSize").toInt(); }
 bool        Settings::useRegEx()            const { return value("UseRegEx").toBool(); }
 //QByteArray  Settings::getSplitterState()    const { return value("SplitterState").toByteArray(); }
-QString     Settings::getLastPath()         const { return value("LastPath").toString(); }
+QString     Settings::getLastPath()         const { return value("LastPath")   .toString(); }
+QString     Settings::getProjectPath()      const { return QDir::toNativeSeparators(value("ProjectPath").toString()); }
 QString     Settings::getExportModularity() const { return value("ExportModularity").toString().toUpper(); }
 
 QFont Settings::getUIFont() const
@@ -38,5 +40,6 @@ void Settings::setUseRegEx        (bool useRegEx)         { setValue("UseRegEx",
 void Settings::setUIFont    (const QFont& font) { setValue("UIFont",     font.toString()); }
 void Settings::setEditorFont(const QFont& font) { setValue("EditorFont", font.toString()); }
 //void Settings::setSplitterState(const QByteArray& state) { setValue("SplitterState", state); }
-void Settings::setLastPath(const QString& path) { setValue("LastPath", path); }
+void Settings::setLastPath   (const QString& path) { setValue("LastPath",    path); }
+void Settings::setProjectPath(const QString& path) { setValue("ProjectPath", QDir::toNativeSeparators(path)); }
 void Settings::setExportModularity(const QString& modularity) { setValue("ExportModularity", modularity); }
