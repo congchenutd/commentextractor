@@ -19,6 +19,7 @@ public:
 //    QByteArray  getSplitterState()    const;
     QString     getLastPath()         const;
     QString     getExportModularity() const;
+    QString     getProjectPath()      const;
 
     void setNameFilterString(const QString& filter);
     void setTagFilter       (const QString& filter);
@@ -30,6 +31,7 @@ public:
     void setSplitterState   (const QByteArray& state);
     void setLastPath        (const QString& path);
     void setExportModularity(const QString& modularity);
+    void setProjectPath     (const QString& path);
 };
 
 #endif // SETTINGS_H

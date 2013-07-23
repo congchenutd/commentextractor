@@ -15,9 +15,6 @@ class TagCountModel : public QStandardItemModel
 public:
     TagCountModel(QObject* parent = 0, TagCounter* counter = 0);
 
-    QString getProjectPath() const { return _projectPath; }
-    void setProjectPath(const QString& projectPath);
-
     void addTag(const QString& tag, const TextBlock& block);
     TagInstanceModel* getInstanceModel(const QString& tag) const;
     void clear();

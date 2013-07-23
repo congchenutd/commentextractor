@@ -24,7 +24,7 @@ public:
     void addTextBlock(const TextBlock& textBlock);
 
     static QList<TextBlock> load(const QString& filePath, const QString& projectPath);
-    void save(const QString& filePath, const QString& projectPath);
+    void save(const QString& filePath);
 
 private:
     QString _keyword;

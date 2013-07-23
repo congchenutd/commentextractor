@@ -33,7 +33,7 @@ private slots:
     void onTagClicked        (const QModelIndex& idx);
     void onTagInstanceClicked(const QModelIndex& idx);
     void onCommentClicked    (const QModelIndex& idx);
-    void onDeleteTag();
+    void onDelete();
     void onExport();
     void onSettings();
 
@@ -53,6 +53,9 @@ private:
 
     void setCurrentInstanceModel(TagInstanceModel* model);
     void setProjectPath(const QString& projectPath);
+
+    void deleteTags();
+    void deleteComments();
 
 private:
     Ui::MainWindow ui;
