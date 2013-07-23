@@ -18,8 +18,8 @@ void TagFilter::run(const QString& filePath)
     if(_extractor == 0 || _filter.isEmpty())
         return;
 
-    _extractor->run(filePath);
-    QList<TextBlock> allBlocks = _extractor->getResult();   // all comments
+    _extractor->run(filePath);                             // extractor gets all the comments from the file
+    QList<TextBlock> allBlocks = _extractor->getResult();
 
     foreach(const TextBlock& block, allBlocks)
     {

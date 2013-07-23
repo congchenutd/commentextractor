@@ -16,7 +16,7 @@ public:
     bool        useRegEx()            const;
     QFont       getUIFont()           const;
     QFont       getEditorFont()       const;
-    QByteArray  getSplitterState()    const;
+//    QByteArray  getSplitterState()    const;
     QString     getLastPath()         const;
     QString     getExportModularity() const;
 
