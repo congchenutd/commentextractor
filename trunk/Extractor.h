@@ -7,6 +7,7 @@
 #include <QString>
 
 class QString;
+class CommentModel;
 
 // Extracts substrings from a file
 // the substrings are caught by a regular expression
@@ -14,7 +15,7 @@ class QString;
 class Extractor : public IRunnableOnFile
 {
 public:
-    Extractor(const QString& pattern);
+    Extractor(const QString& pattern, CommentModel* modelComment = 0);
     QList<TextBlock> getResult() const { return _result; }
 
     void run(const QString& filePath);  // run extractor on the file with filePath
@@ -30,6 +31,7 @@ private:
 private:
     QString _pattern;               // RegEx pattern
     QList<TextBlock> _result;
+    CommentModel*    _modelComment;
 };
 
 

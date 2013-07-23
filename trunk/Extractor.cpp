@@ -1,10 +1,12 @@
 #include "Extractor.h"
 #include "TextBlock.h"
+#include "CommentModel.h"
 #include <QRegExp>
 #include <QFile>
 
-Extractor::Extractor(const QString& pattern)
-    : _pattern(pattern) {}
+Extractor::Extractor(const QString& pattern, CommentModel* modelComment)
+    : _pattern(pattern), _modelComment(modelComment)
+{}
 
 void Extractor::run(const QString& filePath)
 {
@@ -19,7 +21,11 @@ void Extractor::run(const QString& filePath)
     do {
         TextBlock oneMatch = extractOne(text, filePath, cursor);
         if(!oneMatch.getContent().isEmpty())
+        {
             _result << oneMatch;
+            if(_modelComment != 0)
+                _modelComment->addComment(oneMatch);
+        }
     } while(cursor > -1);
 }
 

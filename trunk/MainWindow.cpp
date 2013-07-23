@@ -10,6 +10,7 @@
 #include "Extractor.h"
 #include "Highlighter.h"
 #include "DlgSettings.h"
+#include "CommentModel.h"
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QProgressBar>
@@ -41,9 +42,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui.tvTagCount->setModel(_modelCount);
     ui.tvTagCount->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+    _modelComment = new CommentModel(this);
+    ui.tvComments->setModel(_modelComment);
+
     setCurrentInstanceModel(_modelInstances);
 
-    new Highlighter(ui.textEdit->document());
+    new Highlighter(ui.teTag->document());
 
     connect(ui.actionExtract,  SIGNAL(triggered()), this, SLOT(onExtract()));
     connect(ui.actionPick,     SIGNAL(triggered()), this, SLOT(onPick()));
@@ -54,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui.actionExport,   SIGNAL(triggered()), this, SLOT(onExport()));
     connect(ui.tvTagCount,  SIGNAL(clicked(QModelIndex)), this, SLOT(onTagClicked(QModelIndex)));
     connect(ui.tvInstances, SIGNAL(clicked(QModelIndex)), this, SLOT(onTagInstanceClicked(QModelIndex)));
+    connect(ui.tvComments,  SIGNAL(clicked(QModelIndex)), this, SLOT(onCommentClicked(QModelIndex)));
     connect(ui.tvTagCount->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(onTagClicked(QModelIndex)));
 }
@@ -62,7 +67,7 @@ void MainWindow::onExtract()
 {
     // get project path
     Settings settings;
-    QString projectPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to extract"),
+    QString projectPath = QFileDialog::getExistingDirectory(this, tr("Select the project dir."),
                                                             settings.getLastPath());
     if(projectPath.isEmpty())
         return;
@@ -86,12 +91,13 @@ void MainWindow::onExtract()
     LineCounter lineCounter(_labelLineCount);
     _tagCounter->reset();
 
-    // extractor and filter
-    Extractor extractor("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*");
+    // comment extractor and tag filter
+    _modelComment->clear();
+    Extractor extractor("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*", _modelComment);
     TagFilter tagFilter(&extractor, _modelCount);
     tagFilter.setFilter(getContentFilter(), useRegEx());
 
-    // apply actors on the files
+    // the iterator feeds files to the actors
     iterate(createIterator(), Actors() << &tagFilter << &fileCounter
                                        << &lineCounter << &progressChecker << &fileLog);
 
@@ -127,6 +133,7 @@ void MainWindow::onSave()
     QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to save to"), settings.getLastPath());
     if(!folderPath.isEmpty())
     {
+        _modelComment->save(folderPath);
         _modelCount->save(folderPath);
         settings.setLastPath(folderPath);
     }
@@ -152,23 +159,29 @@ void MainWindow::onTagInstanceClicked(const QModelIndex& idx)
 
     // read file
     QTextStream os(&file);
-    ui.textEdit->setPlainText(os.readAll());
+    ui.teTag->setPlainText(os.readAll());
 
     // scroll to bottom so that the line will be shown at the top of the page
-    ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
+    ui.teTag->verticalScrollBar()->setValue(ui.teTag->verticalScrollBar()->maximum());
 
     // find the block containing lineNum, and move cursor to the block
-    QTextBlock block = ui.textEdit->document()->findBlockByLineNumber(lineNum - 1);
+    QTextBlock block = ui.teTag->document()->findBlockByLineNumber(lineNum - 1);
     QTextCursor cursor(block);
-    ui.textEdit->setTextCursor(cursor);
-    ui.textEdit->ensureCursorVisible();
+    ui.teTag->setTextCursor(cursor);
+    ui.teTag->ensureCursorVisible();
 
     // highlight the line
     QTextEdit::ExtraSelection highlight;
     highlight.cursor = cursor;
     highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
     highlight.format.setBackground(Qt::yellow);
-    ui.textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>() << highlight);
+    ui.teTag->setExtraSelections(QList<QTextEdit::ExtraSelection>() << highlight);
+}
+
+void MainWindow::onCommentClicked(const QModelIndex& idx)
+{
+    if(idx.isValid())
+        ui.teComment->setPlainText(_modelComment->getComment(idx.row()).getContent());
 }
 
 void MainWindow::onDeleteTag()
@@ -241,15 +254,18 @@ void MainWindow::setProjectPath(const QString& projectPath) {
 void MainWindow::loadSettings()
 {
     Settings settings;
-    qApp       ->setFont(settings.getUIFont());
-    ui.textEdit->setFont(settings.getEditorFont());
-    ui.splitter->restoreState(settings.getSplitterState());
+    qApp        ->setFont(settings.getUIFont());
+    ui.teTag    ->setFont(settings.getEditorFont());
+    ui.teComment->setFont(settings.getEditorFont());
+    ui.splitter       ->restoreState(settings.value("TagSplitterState")    .toByteArray());
+    ui.splitterComment->restoreState(settings.value("CommentSplitterState").toByteArray());
 }
 
 void MainWindow::saveSettings()
 {
     Settings settings;
-    settings.setSplitterState(ui.splitter->saveState());
+    settings.setValue("TagSplitterState",     ui.splitter->saveState());
+    settings.setValue("CommentSplitterState", ui.splitterComment->saveState());
 }
 
 void MainWindow::closeEvent(QCloseEvent*) {

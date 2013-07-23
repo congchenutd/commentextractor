@@ -13,6 +13,7 @@ class TagFilter;
 class TagCountModel;
 class TagInstanceModel;
 class TagCounter;
+class CommentModel;
 
 class MainWindow : public QMainWindow
 {
@@ -29,8 +30,9 @@ private slots:
     void onPick();
     void onLoad();
     void onSave();
-    void onTagClicked(const QModelIndex& idx);
+    void onTagClicked        (const QModelIndex& idx);
     void onTagInstanceClicked(const QModelIndex& idx);
+    void onCommentClicked    (const QModelIndex& idx);
     void onDeleteTag();
     void onExport();
     void onSettings();
@@ -56,6 +58,7 @@ private:
     Ui::MainWindow ui;
 
     Settings         _settings;
+    CommentModel*     _modelComment;
     TagCountModel*    _modelCount;
     TagInstanceModel* _modelInstances;
     TagCounter*       _tagCounter;
