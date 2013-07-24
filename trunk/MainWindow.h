@@ -13,6 +13,7 @@ class TagFilter;
 class TagCountModel;
 class TagInstanceModel;
 class TagCounter;
+class PackageCounter;
 class CommentModel;
 
 class MainWindow : public QMainWindow
@@ -57,6 +58,8 @@ private:
     void deleteTags();
     void deleteComments();
 
+    bool currentTabIsComment() const;
+
 private:
     Ui::MainWindow ui;
 
@@ -65,10 +68,12 @@ private:
     TagCountModel*    _modelCount;
     TagInstanceModel* _modelInstances;
     TagCounter*       _tagCounter;
+    PackageCounter*   _packageCounter;
     
     QLabel* _labelFileCount;
     QLabel* _labelLineCount;
     QLabel* _labelTagCount;
+    QLabel* _labelPackageCount;
     QProgressBar* _progressBar;
 };
 

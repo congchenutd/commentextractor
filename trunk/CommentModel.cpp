@@ -1,12 +1,14 @@
 #include "CommentModel.h"
 #include "TextBlock.h"
 #include "Settings.h"
+#include "Counter.h"
 #include <QTextStream>
 #include <QDir>
 #include <QRegularExpression>
+#include <QApplication>
 
-CommentModel::CommentModel(QObject* parent)
-    : QStandardItemModel(parent)
+CommentModel::CommentModel(PackageCounter* packageCounter, QObject* parent)
+    : QStandardItemModel(parent), _packageCounter(packageCounter)
 {
     setColumnCount(4);
     setHeaderData(COL_PACKAGE, Qt::Horizontal, tr("Package"));
@@ -15,21 +17,35 @@ CommentModel::CommentModel(QObject* parent)
     setHeaderData(COL_COMMENT, Qt::Horizontal, tr("Comment"));
 }
 
-void CommentModel::clear() {
+void CommentModel::clear()
+{
     removeRows(0, rowCount());
+    _packageCounter->reset();
 }
 
 void CommentModel::addComment(const TextBlock& textBlock)
 {
     QString content = textBlock.getContent().remove(QRegularExpression("[\\*\\/]")).simplified();
+    addComment(textBlock.getPackageName(), textBlock.getFilePath(), textBlock.getLineNumber(), content);
+}
+
+void CommentModel::addComment(const QString& package, const QString& filePath,
+                              int lineNum, const QString& content)
+{
     if(content.isEmpty())
         return;
     int lastRow = rowCount();
     insertRow(lastRow);
-    setData(index(lastRow, COL_PACKAGE), textBlock.getPackageName());
-    setData(index(lastRow, COL_FILE),    textBlock.getFilePath());
-    setData(index(lastRow, COL_LINE),    textBlock.getLineNumber());
+    setData(index(lastRow, COL_PACKAGE), package);
+    setData(index(lastRow, COL_FILE),    filePath);
+    setData(index(lastRow, COL_LINE),    lineNum);
     setData(index(lastRow, COL_COMMENT), content);
+
+    if(!_packages.contains(package))
+    {
+        _packages.insert(package);
+        _packageCounter->increase();
+    }
 }
 
 TextBlock CommentModel::getComment(int row) const {
@@ -58,6 +74,89 @@ void CommentModel::save(const QString& dirPath)
                << comment.getLineNumber()  << _fieldSeparator
                << comment.getContent()     << _lineSeparator;
         }
+    }
+}
+
+void CommentModel::load(const QString& dirPath)
+{
+    clear();
+
+    QFile file(dirPath + QDir::separator() + "Comments.csv");
+    if(file.open(QFile::ReadOnly))
+    {
+        QTextStream is(&file);
+        QString projectPath = is.readLine();
+        Settings().setProjectPath(projectPath);
+
+        while(!is.atEnd())
+        {
+            QStringList sections = is.readLine().split(_fieldSeparator);
+            if(sections.size() != 5)   // column 0 is id, ignore
+                continue;
+
+            QString filePath = projectPath + sections[2];
+            addComment(sections[1], filePath, sections[3].toInt(), sections[4]);
+        }
+    }
+}
+
+void CommentModel::exportToFile(const QString& filePath, int n)
+{
+    QFile file(filePath);
+    if(!file.open(QFile::WriteOnly))
+        return;
+    QTextStream os(&file);
+
+    sort(COL_PACKAGE);
+
+    int start = 0;
+    int end   = 0;
+    QString currentPackage = data(index(end++, COL_PACKAGE)).toString();
+    do
+    {
+        QString package = data(index(end, COL_PACKAGE)).toString();
+        if(package != currentPackage)  // a new package
+        {
+            pick(start, end, n, os);
+            currentPackage = package;
+            start = end;
+        }
+        end ++;
+    } while(end < rowCount());
+
+    pick(start, end, n, os);
+}
+
+void CommentModel::pick(int start, int end, int n, QTextStream& os)
+{
+    if(start > end)
+        return;
+
+    if(end - start <= n)   // pick all
+    {
+        for(int row = start; row < end; ++row)
+            os << data(index(row, COL_PACKAGE)).toString() << _fieldSeparator
+               << data(index(row, COL_FILE))   .toString() << _fieldSeparator
+               << data(index(row, COL_LINE))   .toString() << _fieldSeparator
+               << data(index(row, COL_COMMENT)).toString() << _lineSeparator;
+    }
+    else                   // pick n rows
+    {
+        QSet<int> rows;
+        for(int i = 0; i < n; ++i)
+        {
+            int row;
+            do {
+                row = qrand() % (end - start) + start;
+            } while(rows.contains(row));
+            rows << row;
+        }
+
+        foreach(int row, rows)
+            os << data(index(row, COL_PACKAGE)).toString() << _fieldSeparator
+               << data(index(row, COL_FILE))   .toString() << _fieldSeparator
+               << data(index(row, COL_LINE))   .toString() << _fieldSeparator
+               << data(index(row, COL_COMMENT)).toString() << _lineSeparator;
     }
 }
 
