@@ -23,4 +23,3 @@ void FileCounter::run(const QString &) {
     increase(1);  // increase the count of files by 1
 }
 
-

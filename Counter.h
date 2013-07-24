@@ -57,7 +57,16 @@ class TagCounter : public IRunnableOnFile, public LabelUpdater
 public:
     TagCounter(QLabel* label = 0) : LabelUpdater(label, "Tag count = ") {}
     void run(const QString&) {}  // does not run on a file, but on every tag add/removal
+                                 // TagCountModel will increase/decrease the count
 };
 
+// Counts packages
+class PackageCounter : public IRunnableOnFile, public LabelUpdater
+{
+public:
+    PackageCounter(QLabel* label = 0) : LabelUpdater(label, "Package count = ") {}
+    void run(const QString&) {}  // does not run on a file, but on every comment add/removal
+                                 // CommentModel will increase/decrease the count
+};
 
 #endif // COUNTER_H

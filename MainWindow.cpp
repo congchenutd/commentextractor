@@ -25,13 +25,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui.setupUi(this);
     loadSettings();
 
-    _labelFileCount = new QLabel(this);
-    _labelLineCount = new QLabel(this);
-    _labelTagCount  = new QLabel(this);
+    _labelFileCount    = new QLabel(this);
+    _labelLineCount    = new QLabel(this);
+    _labelTagCount     = new QLabel(this);
+    _labelPackageCount = new QLabel(this);
     _progressBar = new QProgressBar(this);
     statusBar()->addPermanentWidget(_labelFileCount);
     statusBar()->addPermanentWidget(_labelLineCount);
     statusBar()->addPermanentWidget(_labelTagCount);
+    statusBar()->addPermanentWidget(_labelPackageCount);
     statusBar()->addPermanentWidget(_progressBar);
     _progressBar->hide();
 
@@ -42,7 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui.tvTagCount->setModel(_modelCount);
     ui.tvTagCount->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    _modelComment = new CommentModel(this);
+    _packageCounter = new PackageCounter(_labelPackageCount);
+    _modelComment = new CommentModel(_packageCounter, this);
     ui.tvComments->setModel(_modelComment);
 
     setCurrentInstanceModel(_modelInstances);
@@ -108,6 +111,7 @@ void MainWindow::onPick()
 {
     if(getRandomPickSize() <= 0)
         return;
+
     _modelCount->removeSmall(getRemoveSmallSize());
     _modelCount->pick(getRandomPickSize());
 
@@ -121,7 +125,8 @@ void MainWindow::onLoad()
     QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to load"), settings.getLastPath());
     if(!folderPath.isEmpty())
     {
-        _modelCount->load(folderPath);
+        _modelCount  ->load(folderPath);
+        _modelComment->load(folderPath);
         setProjectPath(settings.getProjectPath());  // count model will have loaded project path
         settings.setLastPath(folderPath);
     }
@@ -134,7 +139,7 @@ void MainWindow::onSave()
     if(!folderPath.isEmpty())
     {
         _modelComment->save(folderPath);
-        _modelCount->save(folderPath);
+        _modelCount  ->save(folderPath);
         settings.setLastPath(folderPath);
     }
 }
@@ -167,7 +172,7 @@ void MainWindow::onCommentClicked(const QModelIndex& idx)
 
 void MainWindow::onDelete()
 {
-    if(ui.tabWidget->currentIndex() == 1)
+    if(currentTabIsComment())
         deleteTags();
     else
         deleteComments();
@@ -181,7 +186,8 @@ void MainWindow::onExport()
                                                     tr("CSV files (*.csv)"));
     if(!filePath.isEmpty())
     {
-        _modelCount->exportToFile(filePath, settings.getExportModularity());
+        _modelCount  ->exportToFile(filePath, settings.getExportModularity());
+        _modelComment->exportToFile(filePath, getRandomPickSize());
         settings.setLastPath(QFileInfo(filePath).path());
     }
 }
@@ -249,6 +255,10 @@ void MainWindow::deleteComments()
     qSort(toBeRemoved.begin(), toBeRemoved.end(), qGreater<int>());
     foreach(int row, toBeRemoved)
         _modelComment->removeRow(row);
+}
+
+bool MainWindow::currentTabIsComment() const {
+    return ui.tabWidget->currentIndex() == 0;
 }
 
 void MainWindow::loadSettings()
