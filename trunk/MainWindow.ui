@@ -44,7 +44,7 @@
             <bool>true</bool>
            </attribute>
           </widget>
-          <widget class="CommentEdit" name="teComment"/>
+          <widget class="CodeEdit" name="teComment"/>
          </widget>
         </item>
        </layout>
@@ -90,7 +90,7 @@
             <bool>true</bool>
            </attribute>
           </widget>
-          <widget class="CommentEdit" name="teTag">
+          <widget class="CodeEdit" name="teTag">
            <property name="font">
             <font>
              <family>Consolas</family>
@@ -118,7 +118,7 @@
      <x>0</x>
      <y>0</y>
      <width>659</width>
-     <height>29</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -245,9 +245,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CommentEdit</class>
+   <class>CodeEdit</class>
    <extends>QTextEdit</extends>
-   <header>CommentEdit.h</header>
+   <header>CodeEdit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -21,6 +21,7 @@ void CommentModel::clear()
 {
     removeRows(0, rowCount());
     _packageCounter->reset();
+    _packages.clear();
 }
 
 void CommentModel::addComment(const TextBlock& textBlock)
@@ -34,6 +35,7 @@ void CommentModel::addComment(const QString& package, const QString& filePath,
 {
     if(content.isEmpty())
         return;
+
     int lastRow = rowCount();
     insertRow(lastRow);
     setData(index(lastRow, COL_PACKAGE), package);
@@ -41,7 +43,8 @@ void CommentModel::addComment(const QString& package, const QString& filePath,
     setData(index(lastRow, COL_LINE),    lineNum);
     setData(index(lastRow, COL_COMMENT), content);
 
-    if(!_packages.contains(package))
+    // count package
+    if(!_packages.contains(package))  // new package
     {
         _packages.insert(package);
         _packageCounter->increase();
@@ -50,8 +53,8 @@ void CommentModel::addComment(const QString& package, const QString& filePath,
 
 TextBlock CommentModel::getComment(int row) const {
     return TextBlock(data(index(row, COL_COMMENT)).toString(),
-                     data(index(row, COL_FILE)).toString(),
-                     data(index(row, COL_LINE)).toInt());
+                     data(index(row, COL_FILE))   .toString(),
+                     data(index(row, COL_LINE))   .toInt());
 }
 
 void CommentModel::save(const QString& dirPath)
@@ -60,7 +63,7 @@ void CommentModel::save(const QString& dirPath)
     if(file.open(QFile::WriteOnly))
     {
         QTextStream os(&file);
-        os << Settings().getProjectPath() << _lineSeparator;
+        os << Settings().getProjectPath() << _lineSeparator;                    // proj path
 
         for(int row = 0; row < rowCount(); ++row)
         {
@@ -86,7 +89,7 @@ void CommentModel::load(const QString& dirPath)
     {
         QTextStream is(&file);
         QString projectPath = is.readLine();
-        Settings().setProjectPath(projectPath);
+        Settings().setProjectPath(projectPath);       // proj path
 
         while(!is.atEnd())
         {
@@ -94,7 +97,7 @@ void CommentModel::load(const QString& dirPath)
             if(sections.size() != 5)   // column 0 is id, ignore
                 continue;
 
-            QString filePath = projectPath + sections[2];
+            QString filePath = projectPath + sections[2];   // relative -> absolute path
             addComment(sections[1], filePath, sections[3].toInt(), sections[4]);
         }
     }
@@ -109,22 +112,22 @@ void CommentModel::exportToFile(const QString& filePath, int n)
 
     sort(COL_PACKAGE);
 
-    int start = 0;
-    int end   = 0;
+    int start = 0;       // start row of current package
+    int end   = 0;       // end points to the start of next package
     QString currentPackage = data(index(end++, COL_PACKAGE)).toString();
     do
     {
-        QString package = data(index(end, COL_PACKAGE)).toString();
-        if(package != currentPackage)  // a new package
+        QString nextPackage = data(index(end, COL_PACKAGE)).toString();
+        if(nextPackage != currentPackage)  // a new package
         {
-            pick(start, end, n, os);
-            currentPackage = package;
+            pick(start, end, n, os);       // pick n rows from previous package
+            currentPackage = nextPackage;  // start the new package
             start = end;
         }
         end ++;
     } while(end < rowCount());
 
-    pick(start, end, n, os);
+    pick(start, end, n, os);               // last package
 }
 
 void CommentModel::pick(int start, int end, int n, QTextStream& os)

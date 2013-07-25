@@ -156,7 +156,7 @@ void MainWindow::onTagInstanceClicked(const QModelIndex& idx)
 
     QString filePath = _modelInstances->getFilePath(idx.row());
     int     lineNum  = _modelInstances->getLineNum (idx.row());
-    ui.teTag->setFile(filePath, lineNum);
+    ui.teTag->loadFile(filePath, lineNum);
 
     statusBar()->showMessage(filePath);
 }
@@ -167,7 +167,7 @@ void MainWindow::onCommentClicked(const QModelIndex& idx)
         return;
 
     TextBlock comment = _modelComment->getComment(idx.row());
-    ui.teComment->setFile(comment.getFilePath(), comment.getLineNumber());
+    ui.teComment->loadFile(comment.getFilePath(), comment.getLineNumber());
 }
 
 void MainWindow::onDelete()
