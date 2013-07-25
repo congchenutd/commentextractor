@@ -7,10 +7,10 @@ class QProgressBar;
 
 // Updates a given progress bar
 // implements IRunnableOnFile
-class ProgressDisplay : public IRunnableOnFile
+class ProgressBarAdapter : public IRunnableOnFile
 {
 public:
-    ProgressDisplay(QProgressBar* progressBar) : _progressBar(progressBar) {}
+    ProgressBarAdapter(QProgressBar* progressBar) : _progressBar(progressBar) {}
     void setMaximum(int max);
     void run(const QString&);
 

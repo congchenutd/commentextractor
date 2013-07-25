@@ -8,7 +8,7 @@ class DlgSettings : public QDialog
     Q_OBJECT
     
 public:
-    explicit DlgSettings(QWidget* parent = 0);
+    DlgSettings(QWidget* parent = 0);
     void accept();
 
     QString getNameFilterString() const;

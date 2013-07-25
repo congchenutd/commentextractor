@@ -18,16 +18,16 @@ void TagFilter::run(const QString& filePath)
     if(_extractor == 0 || _filter.isEmpty())
         return;
 
-    _extractor->run(filePath);                             // extractor gets all the comments from the file
+    _extractor->run(filePath);               // extractor gets all the comments from the file
     QList<TextBlock> allBlocks = _extractor->getResult();
 
-    foreach(const TextBlock& block, allBlocks)
+    foreach(const TextBlock& block, allBlocks)    // for each comment
     {
         QString content = block.getContent();
-        QStringList tags = _useRegEx ? findTagByRegEx(content) : findTagByString(content);
+        QStringList tags = _useRegEx ? findTagByRegEx(content) : findTagByString(content);  // get the tags
         foreach(const QString& tag, tags)
             if(!tag.isEmpty())
-                _model->addTag(tag, block);
+                _model->addTag(tag, block);  // add the tag to the model
     }
 }
 
@@ -46,7 +46,7 @@ QStringList TagFilter::findTagByRegEx(const QString& content) const
             if(!tag.isEmpty())
                 result << tag;
         }
-        match = rx.match(content, match.capturedStart("tag") + match.capturedLength("tag"));
+        match = rx.match(content, match.capturedStart("tag") + match.capturedLength("tag"));  // next
     }
     return result;
 }
