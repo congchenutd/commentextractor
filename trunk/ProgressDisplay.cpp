@@ -2,12 +2,12 @@
 #include <QProgressBar>
 #include <QApplication>
 
-void ProgressDisplay::setMaximum(int max) {
+void ProgressBarAdapter::setMaximum(int max) {
     if(_progressBar != 0)
         _progressBar->setMaximum(max);
 }
 
-void ProgressDisplay::run(const QString&)
+void ProgressBarAdapter::run(const QString&)
 {
     if(_progressBar != 0)
         _progressBar->setValue(_progressBar->value() + 1);

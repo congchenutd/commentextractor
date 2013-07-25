@@ -10,13 +10,15 @@ Extractor::Extractor(const QString& pattern, CommentModel* modelComment)
 
 void Extractor::run(const QString& filePath)
 {
-    _result.clear();            // once a file
+    _result.clear();            // reset result for each run
 
+    // read file
     QFile file(filePath);
     if(!file.open(QFile::ReadOnly))
         return;
     QString text = file.readAll();
 
+    // find all matches
     int cursor = 0;
     do {
         TextBlock oneMatch = extractOne(text, filePath, cursor);

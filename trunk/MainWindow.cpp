@@ -81,8 +81,8 @@ void MainWindow::onExtract()
     _modelCount->clear();
 
     // progress actor
-    ProgressDisplay progressChecker(_progressBar);
-    progressChecker.setMaximum(countFiles());
+    ProgressBarAdapter progressBar(_progressBar);
+    progressBar.setMaximum(countFiles());
     _progressBar->show();
     _progressBar->setValue(0);
 
@@ -102,7 +102,7 @@ void MainWindow::onExtract()
 
     // the iterator feeds files to the actors
     iterate(createIterator(), Actors() << &tagFilter << &fileCounter
-                                       << &lineCounter << &progressChecker << &fileLog);
+                                       << &lineCounter << &progressBar << &fileLog);
 
     _progressBar->hide();
 }

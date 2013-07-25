@@ -29,7 +29,7 @@ private:
     int getLineNumber(const QString& text, int cursor) const;
 
 private:
-    QString _pattern;               // RegEx pattern
+    QString          _pattern;          // RegEx pattern
     QList<TextBlock> _result;
     CommentModel*    _modelComment;
 };

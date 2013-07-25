@@ -46,7 +46,7 @@ void DlgSettings::saveSettings()
 QString DlgSettings::getExportModularity() const
 {
     return ui.radioClass->isChecked() ? "CLASS" :
-           ui.radioFile->isChecked()  ? "FILE" :
+           ui.radioFile ->isChecked() ? "FILE" :
                                         "PACKAGE";
 }
 
