@@ -1,12 +1,12 @@
-#include "CommentEdit.h"
+#include "CodeEdit.h"
 #include <QFile>
 #include <QTextStream>
 #include <QScrollBar>
 #include <QTextBlock>
 
-CommentEdit::CommentEdit(QWidget* parent) : QTextEdit(parent) {}
+CodeEdit::CodeEdit(QWidget* parent) : QTextEdit(parent) {}
 
-void CommentEdit::setFile(const QString &filePath, int lineNum)
+void CodeEdit::loadFile(const QString& filePath, int lineNum)
 {
     QFile file(filePath);
     if(!file.open(QFile::ReadOnly))

@@ -8,6 +8,7 @@ class TextBlock;
 class PackageCounter;
 class QTextStream;
 
+// Model for comment tab
 class CommentModel : public QStandardItemModel
 {
 public:
