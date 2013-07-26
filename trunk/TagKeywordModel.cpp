@@ -1,5 +1,5 @@
-#include "TagCountModel.h"
-#include "TagDetailModel.h"
+#include "TagKeywordModel.h"
+#include "TagInstanceModel.h"
 #include "TextBlock.h"
 #include "Counter.h"
 #include "Settings.h"
@@ -8,57 +8,57 @@
 #include <QDir>
 #include <QApplication>
 
-TagCountModel::TagCountModel(QObject* parent, TagCounter* counter)
+TagKeywordModel::TagKeywordModel(QObject* parent, TagCounter* counter)
     : QStandardItemModel(parent), _counter(counter)
 {
     setColumnCount(2);
-    setHeaderData(COL_TAG,   Qt::Horizontal, tr("Keyword"));
+    setHeaderData(COL_KEYWORD,   Qt::Horizontal, tr("Keyword"));
     setHeaderData(COL_COUNT, Qt::Horizontal, tr("Count"));
 }
 
-void TagCountModel::addTag(const QString& tag, const TextBlock& block)
+void TagKeywordModel::addTag(const QString& keyword, const TextBlock& block)
 {
-    TagInstanceModel* detailModel = 0;
-    int row = findTag(tag);
-    if(row == -1)  // new tag
+    TagInstanceModel* instanceModel = 0;
+    int row = findKeyword(keyword);
+    if(row == -1)  // new kw
     {
         int lastRow = rowCount();
         insertRow(lastRow);
-        setData(index(lastRow, COL_TAG),   tag);
+        setData(index(lastRow, COL_KEYWORD),   keyword);
         setData(index(lastRow, COL_COUNT), 1);
 
-        detailModel = new TagInstanceModel(tag, this);
-        _keyword2Model.insert(tag, detailModel);
+        instanceModel = new TagInstanceModel(keyword, this);
+        _keyword2Model.insert(keyword, instanceModel);
     }
-    else           // existing tag
+    else           // existing kw
     {
-        setData(index(row, COL_TAG), tag);
         setData(index(row, COL_COUNT), data(index(row, COL_COUNT)).toInt() + 1);
-        detailModel = getInstanceModel(tag);
+        instanceModel = getInstanceModel(keyword);
     }
 
-    // add to the detail model
-    if(detailModel != 0)
-        detailModel->addTextBlock(block);
+    // add to the instance model
+    if(instanceModel != 0)
+        instanceModel->addTextBlock(block);
 
     if(_counter != 0)
         _counter->increase();
 }
 
-TagInstanceModel* TagCountModel::getInstanceModel(const QString& tag) const {
+TagInstanceModel* TagKeywordModel::getInstanceModel(const QString& tag) const {
     return _keyword2Model.contains(tag) ? _keyword2Model[tag] : 0;
 }
 
-void TagCountModel::clear()
+void TagKeywordModel::clear()
 {
     removeRows(0, rowCount());
-    foreach(TagInstanceModel* detailModel, _keyword2Model)
-        detailModel->deleteLater();
+    foreach(TagInstanceModel* instanceModel, _keyword2Model)
+        instanceModel->deleteLater();
     _keyword2Model.clear();
 }
 
-void TagCountModel::pick(int n)
+void TagKeywordModel::pick(int n)
 {
+    // for each keyword, pick n random instances
     for(Keyword2Model::Iterator it = _keyword2Model.begin(); it != _keyword2Model.end(); ++it)
     {
         TagInstanceModel* newModel = it.value()->pick(n);  // a new model containing n picked instances
@@ -68,32 +68,32 @@ void TagCountModel::pick(int n)
     }
 }
 
-void TagCountModel::removeSmall(int n)
+void TagKeywordModel::removeSmall(int n)
 {
     if(n <= 0)
         return;
 
     for(int row = 0; row < rowCount();)
     {
-        if(getCount(row) < n)
-            remove(row);
+        if(getCount(row) < n)   // remove small keyword
+            removeRow(row);
         else
             row ++;
     }
 }
 
-void TagCountModel::remove(const QString& tag) {
-    remove(findTag(tag));
+void TagKeywordModel::removeKeyword(const QString& keyword) {
+    removeRow(findKeyword(keyword));
 }
 
-void TagCountModel::remove(int row)
+void TagKeywordModel::removeRow(int row)
 {
-    if(row < 0)
+    if(row < 0 || row >= rowCount())
         return;
 
-    QString tag = getKeyword(row);
-    getInstanceModel(tag)->deleteLater();
-    _keyword2Model.remove(tag);
+    QString keyword = getKeyword(row);
+    getInstanceModel(keyword)->deleteLater();
+    _keyword2Model.remove(keyword);
 
     if(_counter != 0)
         _counter->decrease(getCount(row));
@@ -101,13 +101,13 @@ void TagCountModel::remove(int row)
     removeRow(row);
 }
 
-QString TagCountModel::getModuleName(const TextBlock& textBlock, const QString& modularity) const {
+QString TagKeywordModel::getModuleName(const TextBlock& textBlock, const QString& modularity) const {
     return modularity == "PACKAGE" ? textBlock.getPackageName()
                                    : modularity == "FILE" ? textBlock.getFilePath()
                                                           : textBlock.getCompleteClassName();
 }
 
-void TagCountModel::save(const QString& dirPath)
+void TagKeywordModel::save(const QString& dirPath)
 {
     QFile file(dirPath + QDir::separator() + "TagCount.csv");
     if(file.open(QFile::WriteOnly))
@@ -116,16 +116,16 @@ void TagCountModel::save(const QString& dirPath)
         os << Settings().getProjectPath() << "\r\n";   // save project path
         for(int row = 0; row < rowCount(); ++row)
         {
-            QString tag = getKeyword(row);
-            os << tag << "," << getCount(row) << "\r\n";   // save tag count
+            QString keyword = getKeyword(row);
+            os << keyword << "," << getCount(row) << "\r\n";   // save tag count
 
-            // save tag detail to a separate file
-            getInstanceModel(tag)->save(dirPath + QDir::separator() + tag + ".csv");
+            // save tag instances to a separate file
+            getInstanceModel(keyword)->save(dirPath + QDir::separator() + keyword + ".csv");
         }
     }
 }
 
-void TagCountModel::load(const QString& dirPath)
+void TagKeywordModel::load(const QString& dirPath)
 {
     clear();
 
@@ -141,41 +141,44 @@ void TagCountModel::load(const QString& dirPath)
             if(sections.size() != 2)
                 continue;
 
-            // load tag detail
-            QString tag = sections.at(COL_TAG);
-            QList<TextBlock> blocks = TagInstanceModel::load(dirPath + QDir::separator() + tag + ".csv",
+            // load tag instances
+            QString keyword = sections.at(COL_KEYWORD);
+            QList<TextBlock> blocks = TagInstanceModel::load(dirPath + QDir::separator() + keyword + ".csv",
                                                              Settings().getProjectPath());
             foreach(const TextBlock& block, blocks)
-                addTag(tag, block);
+                addTag(keyword, block);
             qApp->processEvents();
         }
     }
 }
 
-void TagCountModel::exportToFile(const QString& filePath, const QString& modularity)
+void TagKeywordModel::exportToFile(const QString& filePath, const QString& modularity)
 {
+    // write all tags to a table
     TagDistributionModel* distributionModel = new TagDistributionModel(_keyword2Model.keys());
     foreach(TagInstanceModel* instanceModel, _keyword2Model)
     {
-        QList<TextBlock> textBlocks = instanceModel->getTextBlocks();
+        QList<TextBlock> textBlocks = instanceModel->getAllTextBlocks();
         foreach(const TextBlock& textBlock, textBlocks)
             distributionModel->addCount(getModuleName(textBlock, modularity),
                                         instanceModel->getKeyword());
     }
+
+    // save the table to a file
     distributionModel->exportToFile(filePath);
 }
 
-int TagCountModel::findTag(const QString& tag) const
+int TagKeywordModel::findKeyword(const QString& keyword) const
 {
-    QModelIndexList indexes = match(index(0, COL_TAG), Qt::DisplayRole, tag, 1, Qt::MatchExactly);
+    QModelIndexList indexes = match(index(0, COL_KEYWORD), Qt::DisplayRole, keyword, 1, Qt::MatchExactly);
     return indexes.isEmpty() ? -1 : indexes.front().row();
 }
 
-QString TagCountModel::getKeyword(int row) const {
-    return data(index(row, COL_TAG)).toString();
+QString TagKeywordModel::getKeyword(int row) const {
+    return data(index(row, COL_KEYWORD)).toString();
 }
 
-int TagCountModel::getCount(int row) const {
+int TagKeywordModel::getCount(int row) const {
     return data(index(row, COL_COUNT)).toInt();
 }
 
@@ -193,8 +196,6 @@ TagDistributionModel::TagDistributionModel(const QStringList& keywords, QObject*
 
 void TagDistributionModel::addCount(const QString& moduleName, const QString& keyword)
 {
-//    qDebug() << moduleName;
-
     int col = findKeywordCol(keyword);
     if(col == -1)
         return;
@@ -225,7 +226,7 @@ void TagDistributionModel::exportToFile(const QString& filePath)
 
     for(int row = 0; row < rowCount(); ++row)
     {
-        os << headerData(row, Qt::Vertical).toString() << ",";  // vertical header
+        os << headerData(row, Qt::Vertical).toString() << ",";  // vertical header is module name
         for(int col = 0; col < columnCount(); ++col)
             os << data(index(row, col)).toInt() << ",";
         os << "\r\n";

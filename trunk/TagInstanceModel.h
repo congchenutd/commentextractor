@@ -1,5 +1,5 @@
-#ifndef TAGDETAILMODEL_H
-#define TAGDETAILMODEL_H
+#ifndef TAG_INSTANCE_MODEL_H
+#define TAG_INSTANCE_MODEL_H
 
 #include <QStandardItemModel>
 
@@ -19,11 +19,14 @@ public:
     int     getLineNum (int row) const;
 
     TextBlock        getTextBlock(int row) const;
-    QList<TextBlock> getTextBlocks()       const;
+    QList<TextBlock> getAllTextBlocks()    const;
     void setTextBlock(int row, const TextBlock& textBlock);
     void addTextBlock(const TextBlock& textBlock);
 
+    // load a keyword's instances from file
     static QList<TextBlock> load(const QString& filePath, const QString& projectPath);
+
+    // save a keyword's instances to file
     void save(const QString& filePath);
 
 private:
@@ -34,4 +37,4 @@ public:
     static QString _lineSeparator;
 };
 
-#endif // TAGDETAILMODEL_H
+#endif // TAG_INSTANCE_MODEL_H

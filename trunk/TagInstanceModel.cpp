@@ -1,4 +1,4 @@
-#include "TagDetailModel.h"
+#include "TagInstanceModel.h"
 #include "TextBlock.h"
 #include "Settings.h"
 #include <QSet>
@@ -33,7 +33,7 @@ TagInstanceModel* TagInstanceModel::pick(int n)
         if(!pickedRow.contains(row))      // copy row
         {
             result->addTextBlock(getTextBlock(row));
-            pickedRow.insert(row);
+            pickedRow << row;
             ++i;
         }
     }
@@ -68,7 +68,7 @@ QList<TextBlock> TagInstanceModel::load(const QString& filePath, const QString& 
         foreach(const QString& tag, tags)
         {
             QStringList sections = tag.split(",");   // 3 sections: path, line, content
-            if(sections.size() < 3)
+            if(sections.size() != 3)
                 continue;
 
             result << TextBlock(sections.at(COL_CONTENT),
@@ -93,7 +93,7 @@ TextBlock TagInstanceModel::getTextBlock(int row) const {
     return TextBlock(getContent(row), getFilePath(row), getLineNum(row));
 }
 
-QList<TextBlock> TagInstanceModel::getTextBlocks() const
+QList<TextBlock> TagInstanceModel::getAllTextBlocks() const
 {
     QList<TextBlock> result;
     for(int row = 0; row < rowCount(); ++row)

@@ -26,7 +26,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QSplitter" name="splitterComment">
+         <widget class="QSplitter" name="splitterComments">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -55,11 +55,11 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QSplitter" name="splitter">
+         <widget class="QSplitter" name="splitterTags">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QTableView" name="tvTagCount">
+          <widget class="QTableView" name="tvTagKeywords">
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>
@@ -73,7 +73,7 @@
             <bool>true</bool>
            </property>
           </widget>
-          <widget class="QTableView" name="tvInstances">
+          <widget class="QTableView" name="tvTagInstances">
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>

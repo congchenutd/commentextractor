@@ -1,5 +1,5 @@
-#ifndef TAGCOUNTMODEL_H
-#define TAGCOUNTMODEL_H
+#ifndef TAG_KEYWORD_MODEL_H
+#define TAG_KEYWORD_MODEL_H
 
 #include <QStandardItemModel>
 #include <QHash>
@@ -9,18 +9,18 @@ class TextBlock;
 class TagCounter;
 
 // stores tag keywords and their count
-// each tag keyword relates to a TagDetailModel
-class TagCountModel : public QStandardItemModel
+// each tag keyword relates to a TagInstanceModel
+class TagKeywordModel : public QStandardItemModel
 {
 public:
-    TagCountModel(QObject* parent = 0, TagCounter* counter = 0);
+    TagKeywordModel(QObject* parent = 0, TagCounter* counter = 0);
 
-    void addTag(const QString& tag, const TextBlock& block);
+    void addTag(const QString& keyword, const TextBlock& block);
     TagInstanceModel* getInstanceModel(const QString& tag) const;
     void clear();
     void pick(int n);          // randomly pick n instances from each tag
     void removeSmall(int n);   // remove tags with less than n instances
-    void remove(const QString& tag);
+    void removeKeyword(const QString& keyword);
 
     QString getKeyword(int row) const;        // the keyword in row
     int     getCount  (int row) const;        // the tag count in row
@@ -30,23 +30,22 @@ public:
     void exportToFile(const QString& filePath, const QString& modularity);
 
 private:
-    int findTag(const QString& tag) const;    // returns the row of the tag
-    void remove(int row);
+    int findKeyword(const QString& keyword) const;    // returns the row of the tag
+    void removeRow(int row);
     QString getModuleName(const TextBlock& textBlock, const QString& modularity) const;
 
 private:
     typedef QHash<QString, TagInstanceModel*> Keyword2Model;
     Keyword2Model _keyword2Model;
-    TagCounter* _counter;
-    QString     _projectPath;
+    TagCounter*   _counter;
 
 public:
-    enum {COL_TAG, COL_COUNT};
+    enum {COL_KEYWORD, COL_COUNT};
 };
 
 
 // represent the distribution of tags over the packages
-// row is package, col is keyword
+// row is module, col is keyword
 class TagDistributionModel : public QStandardItemModel
 {
 public:
@@ -64,4 +63,4 @@ private:
     QHash<QString, int> _keyword2Col;
 };
 
-#endif // TAGCOUNTMODEL_H
+#endif // TAG_KEYWORD_MODEL_H
