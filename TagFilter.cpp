@@ -1,11 +1,11 @@
 #include "TagFilter.h"
-#include "TagCountModel.h"
+#include "TagKeywordModel.h"
 #include "Extractor.h"
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
 //////////////////////////////////////////////////////////////////////////////////////
-TagFilter::TagFilter(Extractor* extractor, TagCountModel* tagCountModel,
+TagFilter::TagFilter(Extractor* extractor, TagKeywordModel* tagCountModel,
                      const QString& filter, bool useRegEx)
     : _extractor(extractor),
       _model(tagCountModel),

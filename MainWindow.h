@@ -10,7 +10,7 @@ class QDirIterator;
 class QLabel;
 class Extractor;
 class TagFilter;
-class TagCountModel;
+class TagKeywordModel;
 class TagInstanceModel;
 class TagCounter;
 class PackageCounter;
@@ -31,7 +31,7 @@ private slots:
     void onPick();
     void onLoad();
     void onSave();
-    void onTagClicked        (const QModelIndex& idx);
+    void onTagKeywordClicked        (const QModelIndex& idx);
     void onTagInstanceClicked(const QModelIndex& idx);
     void onCommentClicked    (const QModelIndex& idx);
     void onDelete();
@@ -42,11 +42,11 @@ private:
     void loadSettings();
     void saveSettings();
 
-    QStringList getNameFilter()      const { return _settings.getNameFilter(); }
-    QString     getContentFilter()   const { return _settings.getContentFilter(); }
-    int         getRandomPickSize()  const { return _settings.getRandomPickSize(); }
+    QStringList getNameFilter()      const { return _settings.getNameFilter();      }
+    QString     getContentFilter()   const { return _settings.getContentFilter();   }
+    int         getRandomPickSize()  const { return _settings.getRandomPickSize();  }
     int         getRemoveSmallSize() const { return _settings.getRemoveSmallSize(); }
-    bool        useRegEx()           const { return _settings.useRegEx(); }
+    bool        useRegEx()           const { return _settings.useRegEx();           }
 
     QDirIterator* createIterator() const;
     void iterate(QDirIterator* iterator, Actors& actors);   // iterate files and apply actions
@@ -63,10 +63,10 @@ private:
 private:
     Ui::MainWindow ui;
 
-    Settings         _settings;
+    Settings          _settings;
     CommentModel*     _modelComment;
-    TagCountModel*    _modelCount;
-    TagInstanceModel* _modelInstances;
+    TagKeywordModel*  _modelTagKeywords;
+    TagInstanceModel* _modelTagInstances;
     TagCounter*       _tagCounter;
     PackageCounter*   _packageCounter;
     

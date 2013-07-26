@@ -19,16 +19,16 @@ SOURCES += \
     Writer.cpp \
     ProgressDisplay.cpp \
     FileLog.cpp \
-    TagCountModel.cpp \
     TagFilter.cpp \
-    TagDetailModel.cpp \
     Highlighter.cpp \
     MainWindow.cpp \
     DlgSettings.cpp \
     TextBlock.cpp \
     Settings.cpp \
     CommentModel.cpp \
-    CodeEdit.cpp
+    CodeEdit.cpp \
+    TagInstanceModel.cpp \
+    TagKeywordModel.cpp
 
 HEADERS  += \
     Extractor.h \
@@ -38,15 +38,15 @@ HEADERS  += \
     TextBlock.h \
     ProgressDisplay.h \
     FileLog.h \
-    TagCountModel.h \
     TagFilter.h \
-    TagDetailModel.h \
     Highlighter.h \
     MainWindow.h \
     DlgSettings.h \
     Settings.h \
     CommentModel.h \
-    CodeEdit.h
+    CodeEdit.h \
+    TagInstanceModel.h \
+    TagKeywordModel.h
 
 FORMS    += \
     MainWindow.ui \

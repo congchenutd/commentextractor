@@ -6,7 +6,7 @@
 #include <QString>
 
 class Extractor;
-class TagCountModel;
+class TagKeywordModel;
 
 // Extract tags from a file, and save them in a given model
 // uses an extractor to get all the comments
@@ -15,7 +15,7 @@ class TagCountModel;
 class TagFilter : public IRunnableOnFile
 {
 public:
-    TagFilter(Extractor* extractor, TagCountModel* tagCountModel,
+    TagFilter(Extractor* extractor, TagKeywordModel* tagCountModel,
               const QString& filter = QString(), bool useRegEx = true);
     void setFilter(const QString& filter, bool useRegEx) { _filter = filter; _useRegEx = useRegEx; }
 
@@ -27,7 +27,7 @@ private:
 
 private:
     Extractor*     _extractor;
-    TagCountModel* _model;
+    TagKeywordModel* _model;
     QString        _filter;     // regex or substring pattern
     bool           _useRegEx;
 };
