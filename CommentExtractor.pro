@@ -28,7 +28,8 @@ SOURCES += \
     CommentModel.cpp \
     CodeEdit.cpp \
     TagInstanceModel.cpp \
-    TagKeywordModel.cpp
+    TagKeywordModel.cpp \
+    MyStatusBar.cpp
 
 HEADERS  += \
     Extractor.h \
@@ -46,7 +47,8 @@ HEADERS  += \
     CommentModel.h \
     CodeEdit.h \
     TagInstanceModel.h \
-    TagKeywordModel.h
+    TagKeywordModel.h \
+    MyStatusBar.h
 
 FORMS    += \
     MainWindow.ui \

@@ -31,7 +31,7 @@ private slots:
     void onPick();
     void onLoad();
     void onSave();
-    void onTagKeywordClicked        (const QModelIndex& idx);
+    void onTagKeywordClicked (const QModelIndex& idx);
     void onTagInstanceClicked(const QModelIndex& idx);
     void onCommentClicked    (const QModelIndex& idx);
     void onDelete();
