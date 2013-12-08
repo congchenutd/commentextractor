@@ -10,6 +10,7 @@
 #include "Highlighter.h"
 #include "DlgSettings.h"
 #include "CommentModel.h"
+#include "MyStatusBar.h"
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QProgressBar>
@@ -29,12 +30,13 @@ MainWindow::MainWindow(QWidget *parent)
     _labelTagCount     = new QLabel(this);
     _labelPackageCount = new QLabel(this);
     _progressBar = new QProgressBar(this);
+    _progressBar->hide();
+    setStatusBar(new MyStatusBar(this));
     statusBar()->addPermanentWidget(_labelFileCount);
     statusBar()->addPermanentWidget(_labelLineCount);
     statusBar()->addPermanentWidget(_labelTagCount);
     statusBar()->addPermanentWidget(_labelPackageCount);
     statusBar()->addPermanentWidget(_progressBar);
-    _progressBar->hide();
 
     _tagCounter = new TagCounter(_labelTagCount);
     _modelTagKeywords  = new TagKeywordModel(this, _tagCounter);
@@ -136,7 +138,8 @@ void MainWindow::onLoad()
 void MainWindow::onSave()
 {
     Settings settings;
-    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to save to"), settings.getLastPath());
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select a dir to save to"),
+                                                           settings.getLastPath());
     if(!folderPath.isEmpty())
     {
         _modelComment    ->save(folderPath);
