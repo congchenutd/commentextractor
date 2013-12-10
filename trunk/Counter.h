@@ -65,4 +65,5 @@ public:
     PackageCounter(QLabel* label = 0) : LabelUpdater(label, "Package count = ") {}
 };
 
+
 #endif // COUNTER_H

@@ -7,8 +7,10 @@
 #include <QRegularExpression>
 #include <QApplication>
 
-CommentModel::CommentModel(PackageCounter* packageCounter, QObject* parent)
-    : QStandardItemModel(parent), _packageCounter(packageCounter)
+CommentModel::CommentModel(PackageCounter* packageCounter,
+                           QObject* parent)
+    : QStandardItemModel(parent),
+      _packageCounter(packageCounter)
 {
     setColumnCount(4);
     setHeaderData(COL_PACKAGE, Qt::Horizontal, tr("Package"));
