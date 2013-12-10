@@ -12,7 +12,8 @@ public:
     void accept();
 
     QString getNameFilterString() const;
-    QString getContentFilter()    const;
+    QString getCommentFilter()    const;
+    QString getTagFilter()        const;
     int     getRandomPickSize()   const;
     int     getRemoveSmallSize()  const;
     bool    useRegEx()            const;
