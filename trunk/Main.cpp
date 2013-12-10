@@ -20,7 +20,11 @@ int main(int argc, char* argv[])
 {
     qsrand(QTime::currentTime().msec());
     QApplication app(argc, argv);
+
+#ifdef Q_OS_OSX
     QDir::setCurrent(getCurrentPath());
+#endif
+
     MainWindow wnd;
     wnd.showMaximized();
     return app.exec();
