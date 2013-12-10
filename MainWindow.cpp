@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar()->addPermanentWidget(_labelPackageCount);
     statusBar()->addPermanentWidget(_progressBar);
 
-    _tagCounter = new TagCounter(_labelTagCount);
+    _tagCounter = new TagCounter(_labelTagCount);  // the counter may be updated by the model
     _modelTagKeywords  = new TagKeywordModel(this, _tagCounter);
     _modelTagInstances = new TagInstanceModel(QString(), this);
 
@@ -80,6 +80,7 @@ void MainWindow::onExtract()
     settings.setProjectPath(projectPath);
     setProjectPath(projectPath);
 
+    // reset models
     _modelTagKeywords->clear();
     _modelComment->clear();
 
@@ -97,8 +98,10 @@ void MainWindow::onExtract()
     LineCounter lineCounter(_labelLineCount);
     _tagCounter->reset();
 
-    // comment extractor and tag filter
+    // comment extractor extracts all the comments
     Extractor extractor("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*", _modelComment);
+
+    // Tag filter finds tags within the comments
     TagFilter tagFilter(&extractor, _modelTagKeywords);
     tagFilter.setFilter(getContentFilter(), useRegEx());
 
