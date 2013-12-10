@@ -20,8 +20,9 @@ void DlgSettings::accept() {
 void DlgSettings::loadSettings()
 {
     Settings settings;
-    ui.leNameFilter     ->setText   (settings.getNameFilterString());
-    ui.leContentFilter  ->setText   (settings.getContentFilter());
+    ui.leNameFilter   ->setText(settings.getNameFilterString());
+    ui.leCommentFilter->setText(settings.getCommentFilter());
+    ui.leTagFilter    ->setText(settings.getTagFilter());
     ui.sbRandomPickSize ->setValue  (settings.getRandomPickSize());
     ui.sbRemoveSmallSize->setValue  (settings.getRemoveSmallSize());
     ui.checkRegEx       ->setChecked(settings.useRegEx());
@@ -34,7 +35,8 @@ void DlgSettings::saveSettings()
 {
     Settings settings;
     settings.setNameFilterString(getNameFilterString());
-    settings.setTagFilter       (getContentFilter());
+    settings.setCommentFilter   (getCommentFilter());
+    settings.setTagFilter       (getTagFilter());
     settings.setRandomPickSize  (getRandomPickSize());
     settings.setRemoveSmallSize (getRemoveSmallSize());
     settings.setUseRegEx        (useRegEx());
@@ -43,8 +45,7 @@ void DlgSettings::saveSettings()
     settings.setExportModularity(getExportModularity());
 }
 
-QString DlgSettings::getExportModularity() const
-{
+QString DlgSettings::getExportModularity() const {
     return ui.radioClass->isChecked() ? "CLASS" :
            ui.radioFile ->isChecked() ? "FILE" :
                                         "PACKAGE";
@@ -58,7 +59,8 @@ void DlgSettings::setExportModularity(const QString& modularity)
 }
 
 QString DlgSettings::getNameFilterString() const { return ui.leNameFilter->text().simplified(); }
-QString DlgSettings::getContentFilter()    const { return ui.leContentFilter->text(); }
+QString DlgSettings::getCommentFilter()    const { return ui.leCommentFilter->text(); }
+QString DlgSettings::getTagFilter()        const { return ui.leTagFilter->text(); }
 int     DlgSettings::getRandomPickSize()   const { return ui.sbRandomPickSize->value(); }
 int     DlgSettings::getRemoveSmallSize()  const { return ui.sbRemoveSmallSize->value(); }
 bool    DlgSettings::useRegEx()            const { return ui.checkRegEx->isChecked(); }

@@ -16,7 +16,6 @@
 #include <QProgressBar>
 #include <QSettings>
 #include <QTextStream>
-#include <QScrollBar>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -39,17 +38,17 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar()->addPermanentWidget(_progressBar);
 
     _tagCounter = new TagCounter(_labelTagCount);  // the counter may be updated by the model
-    _modelTagKeywords  = new TagKeywordModel(this, _tagCounter);
-    _modelTagInstances = new TagInstanceModel(QString(), this);
+    _modelKeywords  = new TagKeywordModel(this, _tagCounter);
+    _modelInstances = new TagInstanceModel(QString(), this);
 
-    ui.tvTagKeywords->setModel(_modelTagKeywords);
+    ui.tvTagKeywords->setModel(_modelKeywords);
     ui.tvTagKeywords->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     _packageCounter = new PackageCounter(_labelPackageCount);
     _modelComment = new CommentModel(_packageCounter, this);
     ui.tvComments->setModel(_modelComment);
 
-    setCurrentInstanceModel(_modelTagInstances);
+    setCurrentInstanceModel(_modelInstances);
 
     new Highlighter(ui.teTag->document());
 
@@ -81,7 +80,7 @@ void MainWindow::onExtract()
     setProjectPath(projectPath);
 
     // reset models
-    _modelTagKeywords->clear();
+    _modelKeywords->clear();
     _modelComment->clear();
 
     // progress bar
@@ -99,10 +98,10 @@ void MainWindow::onExtract()
     _tagCounter->reset();
 
     // comment extractor extracts all the comments
-    Extractor extractor("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|//[^\\r\\n]*", _modelComment);
+    Extractor extractor(_settings.getCommentFilter(), _modelComment);
 
     // Tag filter finds tags within the comments
-    TagFilter tagFilter(&extractor, _modelTagKeywords);
+    TagFilter tagFilter(&extractor, _modelKeywords);
     tagFilter.setFilter(getContentFilter(), useRegEx());
 
     // the iterator feeds files to the actors
@@ -132,11 +131,11 @@ void MainWindow::onPick()
     if(getRandomPickSize() <= 0)
         return;
 
-    _modelTagKeywords->removeSmall(getRemoveSmallSize());
-    _modelTagKeywords->pick(getRandomPickSize());
+    _modelKeywords->removeSmall(getRemoveSmallSize());
+    _modelKeywords->pick(getRandomPickSize());
 
     // reset current instance model, because it may have been replaced
-    setCurrentInstanceModel(_modelTagKeywords->getInstanceModel(_modelTagInstances->getKeyword()));
+    setCurrentInstanceModel(_modelKeywords->getInstanceModel(_modelInstances->getKeyword()));
 }
 
 void MainWindow::onLoad()
@@ -146,8 +145,8 @@ void MainWindow::onLoad()
                                                            settings.getLastPath());
     if(!folderPath.isEmpty())
     {
-        _modelTagKeywords->load(folderPath);
-        _modelComment    ->load(folderPath);
+        _modelKeywords->load(folderPath);
+        _modelComment ->load(folderPath);
         setProjectPath(settings.getProjectPath());  // the models will have loaded project path
         settings.setLastPath(folderPath);
     }
@@ -160,8 +159,8 @@ void MainWindow::onSave()
                                                            settings.getLastPath());
     if(!folderPath.isEmpty())
     {
-        _modelComment    ->save(folderPath);
-        _modelTagKeywords->save(folderPath);
+        _modelComment ->save(folderPath);
+        _modelKeywords->save(folderPath);
         settings.setLastPath(folderPath);
     }
 }
@@ -169,8 +168,8 @@ void MainWindow::onSave()
 void MainWindow::onTagKeywordClicked(const QModelIndex& idx) {
     if(idx.isValid())
         setCurrentInstanceModel(
-                    _modelTagKeywords->getInstanceModel(
-                        _modelTagKeywords->getKeyword(idx.row())));
+                    _modelKeywords->getInstanceModel(
+                        _modelKeywords->getKeyword(idx.row())));
 }
 
 void MainWindow::onTagInstanceClicked(const QModelIndex& idx)
@@ -178,8 +177,8 @@ void MainWindow::onTagInstanceClicked(const QModelIndex& idx)
     if(!idx.isValid())
         return;
 
-    QString filePath = _modelTagInstances->getFilePath(idx.row());
-    int     lineNum  = _modelTagInstances->getLineNum (idx.row());
+    QString filePath = _modelInstances->getFilePath(idx.row());
+    int     lineNum  = _modelInstances->getLineNum (idx.row());
     ui.teTag->loadFile(filePath, lineNum);
 
     statusBar()->showMessage(filePath);
@@ -214,7 +213,7 @@ void MainWindow::onExport()
                                                     tr("CSV files (*.csv)"));
     if(!filePath.isEmpty())
     {
-        _modelTagKeywords->exportToFile(filePath, settings.getExportModularity());
+        _modelKeywords->exportToFile(filePath, settings.getExportModularity());
         _modelComment    ->exportToFile(filePath, getRandomPickSize());
         settings.setLastPath(QFileInfo(filePath).path());
     }
@@ -238,7 +237,7 @@ void MainWindow::setCurrentInstanceModel(TagInstanceModel* model)
 {
     if(model != 0)
     {
-        _modelTagInstances = model;
+        _modelInstances = model;
         ui.tvTagInstances->setModel(model);
         ui.tvTagInstances->hideColumn(TagInstanceModel::COL_FILEPATH);
         ui.tvTagInstances->hideColumn(TagInstanceModel::COL_LINENUM);
@@ -254,9 +253,9 @@ void MainWindow::deleteTags()
     QModelIndexList rows = ui.tvTagKeywords->selectionModel()->selectedRows();
     QStringList toBeRemoved;
     foreach(const QModelIndex& idx, rows)
-        toBeRemoved << _modelTagKeywords->getKeyword(idx.row());
+        toBeRemoved << _modelKeywords->getKeyword(idx.row());
     foreach(const QString& tag, toBeRemoved)
-        _modelTagKeywords->removeKeyword(tag);
+        _modelKeywords->removeKeyword(tag);
 }
 
 void MainWindow::deleteComments()

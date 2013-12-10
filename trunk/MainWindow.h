@@ -43,7 +43,7 @@ private:
     void saveSettings();
 
     QStringList getNameFilter()      const { return _settings.getNameFilter();      }
-    QString     getContentFilter()   const { return _settings.getContentFilter();   }
+    QString     getContentFilter()   const { return _settings.getTagFilter();   }
     int         getRandomPickSize()  const { return _settings.getRandomPickSize();  }
     int         getRemoveSmallSize() const { return _settings.getRemoveSmallSize(); }
     bool        useRegEx()           const { return _settings.useRegEx();           }
@@ -65,8 +65,8 @@ private:
 
     Settings          _settings;
     CommentModel*     _modelComment;
-    TagKeywordModel*  _modelTagKeywords;
-    TagInstanceModel* _modelTagInstances;
+    TagKeywordModel*  _modelKeywords;
+    TagInstanceModel* _modelInstances;
     TagCounter*       _tagCounter;
     PackageCounter*   _packageCounter;
     

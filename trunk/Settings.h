@@ -10,18 +10,19 @@ public:
 
     QString     getNameFilterString() const;
     QStringList getNameFilter()       const;
-    QString     getContentFilter()    const;
+    QString     getCommentFilter()    const;
+    QString     getTagFilter()        const;
     int         getRandomPickSize()   const;
     int         getRemoveSmallSize()  const;
     bool        useRegEx()            const;
     QFont       getUIFont()           const;
     QFont       getEditorFont()       const;
-//    QByteArray  getSplitterState()    const;
     QString     getLastPath()         const;
     QString     getExportModularity() const;
     QString     getProjectPath()      const;
 
     void setNameFilterString(const QString& filter);
+    void setCommentFilter   (const QString& filter);
     void setTagFilter       (const QString& filter);
     void setRandomPickSize  (int size);
     void setRemoveSmallSize (int size);
