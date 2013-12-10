@@ -3,6 +3,7 @@
 
 #include <QStatusBar>
 
+// double click saves message to clipboard
 class MyStatusBar : public QStatusBar
 {
 public:
