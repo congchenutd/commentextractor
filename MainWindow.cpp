@@ -112,6 +112,21 @@ void MainWindow::onExtract()
     _progressBar->hide();
 }
 
+QDirIterator* MainWindow::createIterator() const {
+    return new QDirIterator(Settings().getProjectPath(), getNameFilter(),
+                            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot,
+                            QDirIterator::Subdirectories);
+}
+
+void MainWindow::iterate(QDirIterator* iterator, Actors& actors)
+{
+    while(iterator->hasNext()) {
+        QString filePath = iterator->next();
+        for(Actors::iterator it = actors.begin(); it != actors.end(); ++it)
+            (*it)->run(filePath);
+    }
+}
+
 void MainWindow::onPick()
 {
     if(getRandomPickSize() <= 0)
@@ -210,21 +225,6 @@ void MainWindow::onSettings()
     DlgSettings dlg(this);
     if(dlg.exec() == QDialog::Accepted)
         loadSettings();    // dlg will save the settings, just apply them here
-}
-
-QDirIterator* MainWindow::createIterator() const {
-    return new QDirIterator(Settings().getProjectPath(), getNameFilter(),
-                            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot,
-                            QDirIterator::Subdirectories);
-}
-
-void MainWindow::iterate(QDirIterator* iterator, Actors& actors)
-{
-    while(iterator->hasNext()) {
-        QString filePath = iterator->next();
-        for(Actors::iterator it = actors.begin(); it != actors.end(); ++it)
-            (*it)->run(filePath);
-    }
 }
 
 int MainWindow::countFiles()
