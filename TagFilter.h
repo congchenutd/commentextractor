@@ -37,8 +37,9 @@ class TagFilterAdapter : public IRunnableOnFile
 {
 public:
     TagFilterAdapter(TagFilter* filter, TagKeywordModel* model);
-    void run(const QString& filePath);
     QList<TextBlock> getResult() const;
+
+    void run(const QString& filePath);
 
 private:
     TagFilter*       _filter;

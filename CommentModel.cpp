@@ -5,7 +5,6 @@
 #include <QTextStream>
 #include <QDir>
 #include <QRegularExpression>
-#include <QApplication>
 
 CommentModel::CommentModel(PackageCounter* packageCounter,
                            CommentLineCounter* lineCounter,
@@ -31,7 +30,7 @@ void CommentModel::clear()
 
 void CommentModel::addComment(const TextBlock& textBlock)
 {
-    QString content = textBlock.getContent().remove(QRegularExpression("[\\*\\/]")).simplified();
+    QString content = textBlock.getContent().remove(QRegularExpression("[\\*\\/]"));
     addComment(textBlock.getPackageName(), textBlock.getFilePath(), textBlock.getLineNumber(), content);
 }
 
@@ -55,7 +54,7 @@ void CommentModel::addComment(const QString& package, const QString& filePath,
         _packageCounter->increase();
     }
 
-    _lineCounter->increase(content.count("\r\n") + 1);
+    _lineCounter->increase(content.count("\n") + 1);
 }
 
 TextBlock CommentModel::getComment(int row) const {
