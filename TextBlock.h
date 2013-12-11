@@ -31,8 +31,8 @@ public:
 private:
     QString _content;
     QString _filePath;
-    QString _keyword;
     int     _lineNumber;
+    QString _keyword;
 };
 
 #endif // TEXTBLOCK_H

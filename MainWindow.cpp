@@ -24,10 +24,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui.setupUi(this);
     loadSettings();
 
-    _labelFileCount    = new QLabel(this);
-    _labelLineCount    = new QLabel(this);
-    _labelTagCount     = new QLabel(this);
-    _labelPackageCount = new QLabel(this);
+    _labelFileCount        = new QLabel(this);
+    _labelLineCount        = new QLabel(this);
+    _labelTagCount         = new QLabel(this);
+    _labelPackageCount     = new QLabel(this);
+    _labelCommentLineCount = new QLabel(this);
     _progressBar = new QProgressBar(this);
     _progressBar->hide();
     setStatusBar(new MyStatusBar(this));
@@ -35,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar()->addPermanentWidget(_labelLineCount);
     statusBar()->addPermanentWidget(_labelTagCount);
     statusBar()->addPermanentWidget(_labelPackageCount);
+    statusBar()->addPermanentWidget(_labelCommentLineCount);
     statusBar()->addPermanentWidget(_progressBar);
 
     _tagCounter = new TagCounter(_labelTagCount);  // the counter may be updated by the model
@@ -44,8 +46,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui.tvTagKeywords->setModel(_modelKeywords);
     ui.tvTagKeywords->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    _packageCounter = new PackageCounter(_labelPackageCount);
-    _modelComment = new CommentModel(_packageCounter, this);
+    _packageCounter     = new PackageCounter    (_labelPackageCount);
+    _commentLineCounter = new CommentLineCounter(_labelCommentLineCount);
+    _modelComment = new CommentModel(_packageCounter, _commentLineCounter, this);
     ui.tvComments->setModel(_modelComment);
 
     setCurrentInstanceModel(_modelInstances);
@@ -79,9 +82,48 @@ void MainWindow::onExtract()
     settings.setProjectPath(projectPath);
     setProjectPath(projectPath);
 
+    if(currentTabIsComment())
+        extractComments();
+    else
+        extractTags();
+}
+
+void MainWindow::extractComments()
+{
+    // reset models
+    _modelComment->clear();
+
+    // progress bar
+    _progressBar->show();
+    _progressBar->setValue(0);
+    ProgressBarAdapter progressBarAdapter(_progressBar);
+    progressBarAdapter.setMaximum(countFiles());
+
+    // File name display
+    FileLog fileLog(statusBar());
+
+    // counters
+    FileCounter fileCounter(_labelFileCount);
+    LineCounter lineCounter(_labelLineCount);
+
+    // comment extractor extracts all the comments
+    Extractor extractor(_settings.getCommentFilter());
+    ExtractorAdapter extractorAdapter(&extractor, _modelComment);
+
+    // the iterator feeds files to the actors
+    iterate(createIterator(), Actors() << &extractorAdapter
+                                       << &fileCounter
+                                       << &lineCounter
+                                       << &progressBarAdapter
+                                       << &fileLog);
+
+    _progressBar->hide();
+}
+
+void MainWindow::extractTags()
+{
     // reset models
     _modelKeywords->clear();
-    _modelComment->clear();
 
     // progress bar
     ProgressBarAdapter progressBarAdapter(_progressBar);
@@ -99,15 +141,17 @@ void MainWindow::onExtract()
 
     // comment extractor extracts all the comments
     Extractor extractor(_settings.getCommentFilter());
-    ExtractorAdapter extractorAdapter(&extractor, _modelComment);
 
     // Tag filter finds tags within the comments
     TagFilter tagFilter(&extractor, getContentFilter(), useRegEx());
     TagFilterAdapter tagFilterAdapter(&tagFilter, _modelKeywords);
 
     // the iterator feeds files to the actors
-    iterate(createIterator(), Actors() << &extractorAdapter << &tagFilterAdapter << &fileCounter
-                                       << &lineCounter << &progressBarAdapter << &fileLog);
+    iterate(createIterator(), Actors() << &tagFilterAdapter
+                                       << &fileCounter
+                                       << &lineCounter
+                                       << &progressBarAdapter
+                                       << &fileLog);
 
     _progressBar->hide();
 }

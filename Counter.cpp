@@ -3,13 +3,13 @@
 #include <QTextDocument>
 #include <QLabel>
 
-LabelUpdater::LabelUpdater(QLabel* label, const QString& message)
-    : _count(0), _label(label), _message(message)
+LabelUpdater::LabelUpdater(QLabel* label, const QString& labelContent)
+    : _count(0), _label(label), _labelComment(labelContent)
 {}
 
 void LabelUpdater::update() {
     if(_label != 0)
-        _label->setText(QObject::tr("%1%2 ").arg(_message).arg(_count));
+        _label->setText(QObject::tr("%1%2 ").arg(_labelComment).arg(_count));
 }
 
 void LineCounter::run(const QString& filePath)
