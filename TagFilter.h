@@ -2,11 +2,12 @@
 #define EXTRACTORDECORATOR_H
 
 #include "Runnable.h"
-#include <QMap>
+#include <QList>
 #include <QString>
 
 class Extractor;
 class TagKeywordModel;
+class TextBlock;
 
 // Extract tags from a file, and save them in a given model
 // uses an extractor to get all the comments
@@ -15,9 +16,8 @@ class TagKeywordModel;
 class TagFilter : public IRunnableOnFile
 {
 public:
-    TagFilter(Extractor* extractor, TagKeywordModel* tagCountModel,
-              const QString& filter = QString(), bool useRegEx = true);
-    void setFilter(const QString& filter, bool useRegEx) { _filter = filter; _useRegEx = useRegEx; }
+    TagFilter(Extractor* extractor, const QString& filter, bool useRegEx);
+    QList<TextBlock> getResult() const { return _result; }
 
     void run(const QString& filePath);
 
@@ -26,11 +26,23 @@ private:
     QStringList findTagByString(const QString& content) const;
 
 private:
-    Extractor*     _extractor;
-    TagKeywordModel* _model;
-    QString        _filter;     // regex or substring pattern
-    bool           _useRegEx;
+    Extractor*       _extractor;
+    QString          _filter;     // regex or substring pattern
+    bool             _useRegEx;
+    QList<TextBlock> _result;
 };
 
+// connecting a TagFilter to a TagKeywordModel
+class TagFilterAdapter : public IRunnableOnFile
+{
+public:
+    TagFilterAdapter(TagFilter* filter, TagKeywordModel* model);
+    void run(const QString& filePath);
+    QList<TextBlock> getResult() const;
+
+private:
+    TagFilter*       _filter;
+    TagKeywordModel* _model;
+};
 
 #endif // EXTRACTORDECORATOR_H

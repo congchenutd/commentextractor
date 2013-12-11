@@ -15,7 +15,7 @@ class CommentModel;
 class Extractor : public IRunnableOnFile
 {
 public:
-    Extractor(const QString& pattern, CommentModel* modelComment = 0);
+    Extractor(const QString& pattern);
     QList<TextBlock> getResult() const { return _result; }
 
     void run(const QString& filePath);  // run extractor on the file with filePath
@@ -31,8 +31,20 @@ private:
 private:
     QString          _pattern;          // RegEx pattern
     QList<TextBlock> _result;
-    CommentModel*    _modelComment;
 };
 
+// connecting an Extractor to a CommentModel
+class ExtractorAdapter : public IRunnableOnFile
+{
+public:
+    ExtractorAdapter(Extractor* extractor, CommentModel* model);
+    QList<TextBlock> getResult() const;
+
+    void run(const QString& filePath);
+
+private:
+    Extractor*    _extractor;
+    CommentModel* _model;
+};
 
 #endif // EXTRACTOR_H

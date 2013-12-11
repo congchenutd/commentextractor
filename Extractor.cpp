@@ -4,9 +4,8 @@
 #include <QRegExp>
 #include <QFile>
 
-Extractor::Extractor(const QString& pattern, CommentModel* modelComment)
-    : _pattern(pattern), _modelComment(modelComment)
-{}
+Extractor::Extractor(const QString& pattern)
+    : _pattern(pattern) {}
 
 void Extractor::run(const QString& filePath)
 {
@@ -23,11 +22,7 @@ void Extractor::run(const QString& filePath)
     do {
         TextBlock oneMatch = extractOne(text, filePath, cursor);
         if(!oneMatch.getContent().isEmpty())
-        {
             _result << oneMatch;
-            if(_modelComment != 0)
-                _modelComment->addComment(oneMatch);
-        }
     } while(cursor > -1);
 }
 
@@ -48,4 +43,24 @@ TextBlock Extractor::extractOne(const QString& text, const QString& filePath, in
     cursor = index + rx.matchedLength();
     int lineNumber = getLineNumber(text, index);
     return TextBlock(text.mid(index, rx.matchedLength()), filePath, lineNumber);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+ExtractorAdapter::ExtractorAdapter(Extractor* extractor, CommentModel* model)
+    : _extractor(extractor),
+      _model(model) {}
+
+QList<TextBlock> ExtractorAdapter::getResult() const {
+    return _extractor->getResult();
+}
+
+void ExtractorAdapter::run(const QString& filePath)
+{
+    _extractor->run(filePath);
+    if(_model != 0)
+    {
+        QList<TextBlock> result = getResult();
+        foreach(const TextBlock& block, result)
+            _model->addComment(block);
+    }
 }
