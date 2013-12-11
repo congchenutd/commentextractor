@@ -18,10 +18,11 @@ public:
     Extractor(const QString& pattern);
     QList<TextBlock> getResult() const { return _result; }
 
-    void run(const QString& filePath);  // run extractor on the file with filePath
+    void run(const QString& filePath);  // run extractor on the file
 
 private:
-    // extract one matching substring from text, starting from cursor, filePath is the file containing the text
+    // extract one matching substring from text, starting from cursor,
+    // filePath is the file containing the text
     // cursor will be updated after each call
     TextBlock extractOne(const QString& text, const QString& filePath, int& cursor) const;
 

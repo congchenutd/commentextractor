@@ -39,7 +39,7 @@ private:
 class LineCounter : public IRunnableOnFile, public LabelUpdater
 {
 public:
-    LineCounter(QLabel* label = 0) : LabelUpdater(label, "Line count = ") {}
+    LineCounter(QLabel* label = 0) : LabelUpdater(label, "# Lines = ") {}
     void run(const QString& filePath);
 };
 
