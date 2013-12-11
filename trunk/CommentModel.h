@@ -6,13 +6,16 @@
 
 class TextBlock;
 class PackageCounter;
+class CommentLineCounter;
 class QTextStream;
 
 // Model for comment tab
 class CommentModel : public QStandardItemModel
 {
 public:
-    CommentModel(PackageCounter* packageCounter, QObject* parent = 0);
+    CommentModel(PackageCounter*     packageCounter,
+                 CommentLineCounter* lineCounter,
+                 QObject* parent = 0);
 
     void clear();
     void addComment(const TextBlock& textBlock);
@@ -32,8 +35,9 @@ public:
     static QString _lineSeparator;
 
 private:
-    PackageCounter* _packageCounter;
-    QSet<QString>   _packages;
+    PackageCounter*     _packageCounter;
+    CommentLineCounter* _lineCounter;
+    QSet<QString>       _packages;
 };
 
 #endif // COMMENTMODEL_H

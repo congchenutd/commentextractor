@@ -21,7 +21,7 @@ class QLabel;
 class LabelUpdater : public Counter
 {
 public:
-    LabelUpdater(QLabel* label, const QString& message);
+    LabelUpdater(QLabel* label, const QString& labelContent);
     void update();   // update the label with the count
 
     int getCount() const { return _count; }
@@ -32,7 +32,7 @@ public:
 private:
     int     _count;
     QLabel* _label;
-    QString _message;
+    QString _labelComment;
 };
 
 // Counts number of lines in a file
@@ -47,7 +47,7 @@ public:
 class FileCounter : public IRunnableOnFile, public LabelUpdater
 {
 public:
-    FileCounter(QLabel* label = 0) : LabelUpdater(label, "File count = ") {}
+    FileCounter(QLabel* label = 0) : LabelUpdater(label, "# Files = ") {}
     void run(const QString&);
 };
 
@@ -55,15 +55,20 @@ public:
 class TagCounter : public LabelUpdater
 {
 public:
-    TagCounter(QLabel* label = 0) : LabelUpdater(label, "Tag count = ") {}
+    TagCounter(QLabel* label = 0) : LabelUpdater(label, "# Tags = ") {}
 };
 
 // Counts packages
 class PackageCounter : public LabelUpdater
 {
 public:
-    PackageCounter(QLabel* label = 0) : LabelUpdater(label, "Package count = ") {}
+    PackageCounter(QLabel* label = 0) : LabelUpdater(label, "# Package = ") {}
 };
 
+class CommentLineCounter : public LabelUpdater
+{
+public:
+    CommentLineCounter(QLabel* label = 0) : LabelUpdater(label, "# Comment lines = ") {}
+};
 
 #endif // COUNTER_H

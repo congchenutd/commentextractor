@@ -8,9 +8,11 @@
 #include <QApplication>
 
 CommentModel::CommentModel(PackageCounter* packageCounter,
+                           CommentLineCounter* lineCounter,
                            QObject* parent)
     : QStandardItemModel(parent),
-      _packageCounter(packageCounter)
+      _packageCounter(packageCounter),
+      _lineCounter(lineCounter)
 {
     setColumnCount(4);
     setHeaderData(COL_PACKAGE, Qt::Horizontal, tr("Package"));
@@ -23,6 +25,7 @@ void CommentModel::clear()
 {
     removeRows(0, rowCount());
     _packageCounter->reset();
+    _lineCounter   ->reset();
     _packages.clear();
 }
 
@@ -51,6 +54,8 @@ void CommentModel::addComment(const QString& package, const QString& filePath,
         _packages.insert(package);
         _packageCounter->increase();
     }
+
+    _lineCounter->increase(content.count("\r\n") + 1);
 }
 
 TextBlock CommentModel::getComment(int row) const {

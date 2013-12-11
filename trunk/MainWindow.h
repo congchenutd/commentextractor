@@ -14,6 +14,7 @@ class TagKeywordModel;
 class TagInstanceModel;
 class TagCounter;
 class PackageCounter;
+class CommentLineCounter;
 class CommentModel;
 
 class MainWindow : public QMainWindow
@@ -60,6 +61,9 @@ private:
 
     bool currentTabIsComment() const;
 
+    void extractComments();
+    void extractTags();
+
 private:
     Ui::MainWindow ui;
 
@@ -67,13 +71,15 @@ private:
     CommentModel*     _modelComment;
     TagKeywordModel*  _modelKeywords;
     TagInstanceModel* _modelInstances;
-    TagCounter*       _tagCounter;
-    PackageCounter*   _packageCounter;
+    TagCounter*         _tagCounter;
+    PackageCounter*     _packageCounter;
+    CommentLineCounter* _commentLineCounter;
     
     QLabel* _labelFileCount;
     QLabel* _labelLineCount;
     QLabel* _labelTagCount;
     QLabel* _labelPackageCount;
+    QLabel* _labelCommentLineCount;
     QProgressBar* _progressBar;
 };
 
