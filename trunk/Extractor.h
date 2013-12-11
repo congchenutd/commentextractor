@@ -38,7 +38,7 @@ private:
 class ExtractorAdapter : public IRunnableOnFile
 {
 public:
-    ExtractorAdapter(Extractor* extractor, CommentModel* model);
+    ExtractorAdapter(Extractor* extractor, CommentModel* model = 0);
     QList<TextBlock> getResult() const;
 
     void run(const QString& filePath);
