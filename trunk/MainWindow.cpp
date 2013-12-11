@@ -98,14 +98,15 @@ void MainWindow::onExtract()
     _tagCounter->reset();
 
     // comment extractor extracts all the comments
-    Extractor extractor(_settings.getCommentFilter(), _modelComment);
+    Extractor extractor(_settings.getCommentFilter());
+    ExtractorAdapter extractorAdapter(&extractor, _modelComment);
 
     // Tag filter finds tags within the comments
-    TagFilter tagFilter(&extractor, _modelKeywords);
-    tagFilter.setFilter(getContentFilter(), useRegEx());
+    TagFilter tagFilter(&extractor, getContentFilter(), useRegEx());
+    TagFilterAdapter tagFilterAdapter(&tagFilter, _modelKeywords);
 
     // the iterator feeds files to the actors
-    iterate(createIterator(), Actors() << &tagFilter   << &fileCounter
+    iterate(createIterator(), Actors() << &extractorAdapter << &tagFilterAdapter << &fileCounter
                                        << &lineCounter << &progressBarAdapter << &fileLog);
 
     _progressBar->hide();

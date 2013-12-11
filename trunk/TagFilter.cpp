@@ -1,14 +1,13 @@
 #include "TagFilter.h"
 #include "TagKeywordModel.h"
 #include "Extractor.h"
+#include "TextBlock.h"
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
 //////////////////////////////////////////////////////////////////////////////////////
-TagFilter::TagFilter(Extractor* extractor, TagKeywordModel* tagCountModel,
-                     const QString& filter, bool useRegEx)
+TagFilter::TagFilter(Extractor* extractor, const QString& filter, bool useRegEx)
     : _extractor(extractor),
-      _model(tagCountModel),
       _filter(filter),
       _useRegEx(useRegEx)
 {}
@@ -18,16 +17,22 @@ void TagFilter::run(const QString& filePath)
     if(_extractor == 0 || _filter.isEmpty())
         return;
 
+    _result.clear();
+
     _extractor->run(filePath);               // get all the comments from the file
     QList<TextBlock> allBlocks = _extractor->getResult();
 
     foreach(const TextBlock& block, allBlocks)    // for each comment
     {
         QString content = block.getContent();
-        QStringList tags = _useRegEx ? findTagByRegEx(content) : findTagByString(content);  // get the tags
+        QStringList tags = _useRegEx ? findTagByRegEx(content)
+                                     : findTagByString(content);  // get the tags
         foreach(const QString& tag, tags)
             if(!tag.isEmpty())
-                _model->addTag(tag, block);  // add the tag to the model
+                _result << TextBlock(block.getContent(),
+                                     block.getFilePath(),
+                                     block.getLineNumber(),
+                                     tag);
     }
 }
 
@@ -60,3 +65,23 @@ QStringList TagFilter::findTagByString(const QString& content) const
             result << filter;
     return result;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+TagFilterAdapter::TagFilterAdapter(TagFilter* filter, TagKeywordModel* model)
+    : _filter(filter),
+      _model(model) {}
+
+void TagFilterAdapter::run(const QString& filePath)
+{
+    _filter->run(filePath);
+    QList<TextBlock> tags = _filter->getResult();
+    foreach(const TextBlock& tag, tags)
+        _model->addTag(tag.getKeyword(), tag);
+}
+
+QList<TextBlock> TagFilterAdapter::getResult() const {
+    return _filter->getResult();
+}
+
+

@@ -5,8 +5,14 @@
 #include <QFileInfo>
 #include <QDebug>
 
-TextBlock::TextBlock(const QString& content, const QString& filePath, int lineNumber)
-    : _content(content), _filePath(filePath), _lineNumber(lineNumber)
+TextBlock::TextBlock(const QString& content,
+                     const QString& filePath,
+                     int lineNumber,
+                     const QString& keyword)
+    : _content(content),
+      _filePath(filePath),
+      _lineNumber(lineNumber),
+      _keyword(keyword)
 {}
 
 QString TextBlock::getPackageName() const
