@@ -64,16 +64,18 @@ QList<TextBlock> TagInstanceModel::load(const QString& filePath, const QString& 
     if(file.open(QFile::ReadOnly))
     {
         QTextStream is(&file);
-        QStringList tags = is.readAll().split(_lineSeparator);  // each line is a tag
-        foreach(const QString& tag, tags)
+        QStringList lines = is.readAll().split(_lineSeparator);  // each line is a tag
+        foreach(const QString& line, lines)
         {
-            QStringList sections = tag.split(",");   // 3 sections: path, line, content
-            if(sections.size() != 3)
+            if(line.isEmpty())
                 continue;
 
-            result << TextBlock(sections.at(COL_CONTENT),
-                                projectPath + QDir::toNativeSeparators(sections.at(COL_FILEPATH)),
-                                sections.at(COL_LINENUM).toInt());
+            QString filePath = line.section(",", 0, 0);
+            int     lineNum  = line.section(",", 1, 1).toInt();
+            QString content  = line.section(",", 2, -1);
+            result << TextBlock(content,
+                                projectPath + QDir::toNativeSeparators(filePath),
+                                lineNum);
         }
     }
     return result;
