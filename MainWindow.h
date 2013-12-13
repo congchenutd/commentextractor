@@ -13,6 +13,7 @@ class TagFilter;
 class TagKeywordModel;
 class TagInstanceModel;
 class TagCounter;
+class TagLineCounter;
 class PackageCounter;
 class CommentLineCounter;
 class CommentModel;
@@ -72,12 +73,14 @@ private:
     TagKeywordModel*  _modelKeywords;
     TagInstanceModel* _modelInstances;
     TagCounter*         _tagCounter;
+    TagLineCounter*     _tagLineCounter;
     PackageCounter*     _packageCounter;
     CommentLineCounter* _commentLineCounter;
     
     QLabel* _labelFileCount;
     QLabel* _labelLineCount;
     QLabel* _labelTagCount;
+    QLabel* _labelTagLineCount;
     QLabel* _labelPackageCount;
     QLabel* _labelCommentLineCount;
     QProgressBar* _progressBar;

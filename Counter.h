@@ -58,6 +58,13 @@ public:
     TagCounter(QLabel* label = 0) : LabelUpdater(label, "# Tags = ") {}
 };
 
+// Counts the lines of tags
+class TagLineCounter : public LabelUpdater
+{
+public:
+    TagLineCounter(QLabel* label = 0) : LabelUpdater(label, "# Tag lines = ") {}
+};
+
 // Counts packages
 class PackageCounter : public LabelUpdater
 {

@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     _labelFileCount        = new QLabel(this);
     _labelLineCount        = new QLabel(this);
     _labelTagCount         = new QLabel(this);
+    _labelTagLineCount     = new QLabel(this);
     _labelPackageCount     = new QLabel(this);
     _labelCommentLineCount = new QLabel(this);
     _progressBar = new QProgressBar(this);
@@ -35,16 +36,17 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar()->addPermanentWidget(_labelFileCount);
     statusBar()->addPermanentWidget(_labelLineCount);
     statusBar()->addPermanentWidget(_labelTagCount);
+    statusBar()->addPermanentWidget(_labelTagLineCount);
     statusBar()->addPermanentWidget(_labelPackageCount);
     statusBar()->addPermanentWidget(_labelCommentLineCount);
     statusBar()->addPermanentWidget(_progressBar);
 
-    _tagCounter = new TagCounter(_labelTagCount);  // the counter may be updated by the model
-    _modelKeywords  = new TagKeywordModel(this, _tagCounter);
+    _tagCounter     = new TagCounter(_labelTagCount);  // the counters may be updated by the model
+    _tagLineCounter = new TagLineCounter(_labelTagLineCount);
+    _modelKeywords  = new TagKeywordModel(this, _tagCounter, _tagLineCounter);
     _modelInstances = new TagInstanceModel(QString(), this);
 
     ui.tvTagKeywords->setModel(_modelKeywords);
-    ui.tvTagKeywords->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     _packageCounter     = new PackageCounter    (_labelPackageCount);
     _commentLineCounter = new CommentLineCounter(_labelCommentLineCount);
@@ -245,9 +247,9 @@ void MainWindow::onCommentClicked(const QModelIndex& idx)
 void MainWindow::onDelete()
 {
     if(currentTabIsComment())
-        deleteTags();
-    else
         deleteComments();
+    else
+        deleteTags();
 }
 
 void MainWindow::onExport()
