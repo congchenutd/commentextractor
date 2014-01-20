@@ -16,6 +16,8 @@ class TagCounter;
 class TagLineCounter;
 class PackageCounter;
 class CommentLineCounter;
+class TagLengthCounter;
+class CommentLengthCounter;
 class CommentModel;
 
 class MainWindow : public QMainWindow
@@ -72,17 +74,9 @@ private:
     CommentModel*     _modelComment;
     TagKeywordModel*  _modelKeywords;
     TagInstanceModel* _modelInstances;
-    TagCounter*         _tagCounter;
-    TagLineCounter*     _tagLineCounter;
-    PackageCounter*     _packageCounter;
-    CommentLineCounter* _commentLineCounter;
-    
+
     QLabel* _labelFileCount;
     QLabel* _labelLineCount;
-    QLabel* _labelTagCount;
-    QLabel* _labelTagLineCount;
-    QLabel* _labelPackageCount;
-    QLabel* _labelCommentLineCount;
     QProgressBar* _progressBar;
 };
 

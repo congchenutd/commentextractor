@@ -39,7 +39,7 @@ private:
 class LineCounter : public IRunnableOnFile, public LabelUpdater
 {
 public:
-    LineCounter(QLabel* label = 0) : LabelUpdater(label, "# Lines = ") {}
+    LineCounter(QLabel* label = 0) : LabelUpdater(label, "LOC = ") {}
     void run(const QString& filePath);
 };
 
@@ -47,7 +47,7 @@ public:
 class FileCounter : public IRunnableOnFile, public LabelUpdater
 {
 public:
-    FileCounter(QLabel* label = 0) : LabelUpdater(label, "# Files = ") {}
+    FileCounter(QLabel* label = 0) : LabelUpdater(label, "NOF = ") {}
     void run(const QString&);
 };
 
@@ -55,27 +55,42 @@ public:
 class TagCounter : public LabelUpdater
 {
 public:
-    TagCounter(QLabel* label = 0) : LabelUpdater(label, "# Tags = ") {}
+    TagCounter(QLabel* label = 0) : LabelUpdater(label, "NOT = ") {}
 };
 
 // Counts the lines of tags
 class TagLineCounter : public LabelUpdater
 {
 public:
-    TagLineCounter(QLabel* label = 0) : LabelUpdater(label, "# Tag lines = ") {}
+    TagLineCounter(QLabel* label = 0) : LabelUpdater(label, "LOT = ") {}
 };
 
 // Counts packages
 class PackageCounter : public LabelUpdater
 {
 public:
-    PackageCounter(QLabel* label = 0) : LabelUpdater(label, "# Package = ") {}
+    PackageCounter(QLabel* label = 0) : LabelUpdater(label, "NOP = ") {}
 };
 
+// Counts the lines of comments
 class CommentLineCounter : public LabelUpdater
 {
 public:
-    CommentLineCounter(QLabel* label = 0) : LabelUpdater(label, "# Comment lines = ") {}
+    CommentLineCounter(QLabel* label = 0) : LabelUpdater(label, "LOM = ") {}
+};
+
+// Counts the length of tags
+class TagLengthCounter : public LabelUpdater
+{
+public:
+    TagLengthCounter(QLabel* label = 0) : LabelUpdater(label, "WOT = ") {}
+};
+
+// Counts the length of comments
+class CommentLengthCounter : public LabelUpdater
+{
+public:
+    CommentLengthCounter(QLabel* label = 0) : LabelUpdater(label, "WOM = ") {}
 };
 
 #endif // COUNTER_H

@@ -8,14 +8,17 @@ class TagInstanceModel;
 class TextBlock;
 class TagCounter;
 class TagLineCounter;
+class TagLengthCounter;
 
 // stores tag keywords and their count
 // each tag keyword relates to a TagInstanceModel
 class TagKeywordModel : public QStandardItemModel
 {
 public:
-    TagKeywordModel(QObject* parent = 0, TagCounter*     counter     = 0,
-                                         TagLineCounter* lineCounter = 0);
+    TagKeywordModel(TagCounter*       counterTag,
+                    TagLineCounter*   counterTagLine,
+                    TagLengthCounter* counterTagLen,
+                    QObject* parent = 0);
 
     void addTag(const QString& keyword, const TextBlock& block);
     TagInstanceModel* getInstanceModel(const QString& tag) const;
@@ -27,6 +30,7 @@ public:
     QString getKeyword  (int row) const;   // the keyword in row
     int     getCount    (int row) const;   // the tag count in row
     int     getLineCount(int row) const;   // # lines
+    int     getLength   (int row) const;   // # words
 
     void save(const QString& dirPath);
     void load(const QString& dirPath);
@@ -40,11 +44,12 @@ private:
 private:
     typedef QHash<QString, TagInstanceModel*> Keyword2Model;
     Keyword2Model _keyword2Model;
-    TagCounter*     _counter;
-    TagLineCounter* _lineCounter;
+    TagCounter*       _counterTag;
+    TagLineCounter*   _counterTagLine;
+    TagLengthCounter* _counterTagLen;
 
 public:
-    enum {COL_KEYWORD, COL_COUNT, COL_LINECOUNT};
+    enum {COL_KEYWORD, COL_COUNT, COL_LINECOUNT, COL_LEN};
 };
 
 

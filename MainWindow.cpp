@@ -16,6 +16,7 @@
 #include <QProgressBar>
 #include <QSettings>
 #include <QTextStream>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -24,35 +25,42 @@ MainWindow::MainWindow(QWidget *parent)
     ui.setupUi(this);
     loadSettings();
 
-    _labelFileCount        = new QLabel(this);
-    _labelLineCount        = new QLabel(this);
-    _labelTagCount         = new QLabel(this);
-    _labelTagLineCount     = new QLabel(this);
-    _labelPackageCount     = new QLabel(this);
-    _labelCommentLineCount = new QLabel(this);
+    _labelFileCount      = new QLabel(this);
+    _labelLineCount      = new QLabel(this);
+    QLabel* labelTagCount     = new QLabel(this);
+    QLabel* labelTagLineCount = new QLabel(this);
+    QLabel* labelTagLenCount  = new QLabel(this);
+    QLabel* labelPackageCount = new QLabel(this);
+    QLabel* labelCmtLineCount = new QLabel(this);
+    QLabel* labelCmtLenCount  = new QLabel(this);
     _progressBar = new QProgressBar(this);
     _progressBar->hide();
     setStatusBar(new MyStatusBar(this));
     statusBar()->addPermanentWidget(_labelFileCount);
     statusBar()->addPermanentWidget(_labelLineCount);
-    statusBar()->addPermanentWidget(_labelTagCount);
-    statusBar()->addPermanentWidget(_labelTagLineCount);
-    statusBar()->addPermanentWidget(_labelPackageCount);
-    statusBar()->addPermanentWidget(_labelCommentLineCount);
+    statusBar()->addPermanentWidget(labelTagCount);
+    statusBar()->addPermanentWidget(labelTagLineCount);
+    statusBar()->addPermanentWidget(labelTagLenCount);
+    statusBar()->addPermanentWidget(labelPackageCount);
+    statusBar()->addPermanentWidget(labelCmtLineCount);
+    statusBar()->addPermanentWidget(labelCmtLenCount);
     statusBar()->addPermanentWidget(_progressBar);
 
-    _tagCounter     = new TagCounter(_labelTagCount);  // the counters may be updated by the model
-    _tagLineCounter = new TagLineCounter(_labelTagLineCount);
-    _modelKeywords  = new TagKeywordModel(this, _tagCounter, _tagLineCounter);
-    _modelInstances = new TagInstanceModel(QString(), this);
-
+    // the counters are updated by the model
+    _modelKeywords  = new TagKeywordModel(new TagCounter      (labelTagCount),
+                                          new TagLineCounter  (labelTagLineCount),
+                                          new TagLengthCounter(labelTagLenCount),
+                                          this);
     ui.tvTagKeywords->setModel(_modelKeywords);
+//    ui.tvTagKeywords->hideColumn(TagKeywordModel::COL_LINECOUNT);
 
-    _packageCounter     = new PackageCounter    (_labelPackageCount);
-    _commentLineCounter = new CommentLineCounter(_labelCommentLineCount);
-    _modelComment = new CommentModel(_packageCounter, _commentLineCounter, this);
+    _modelComment = new CommentModel(new PackageCounter      (labelPackageCount),
+                                     new CommentLineCounter  (labelCmtLineCount),
+                                     new CommentLengthCounter(labelCmtLenCount),
+                                     this);
     ui.tvComments->setModel(_modelComment);
 
+    _modelInstances = new TagInstanceModel(QString(), this);
     setCurrentInstanceModel(_modelInstances);
 
     new Highlighter(ui.teTag->document());
@@ -76,7 +84,8 @@ void MainWindow::onExtract()
     // get project path
     Settings settings;
     QString projectPath = QFileDialog::getExistingDirectory(this, tr("Select the project dir."),
-                                                            settings.getLastPath());
+                                                            settings.getLastPath(),
+                                                            QFileDialog::ShowDirsOnly);
     if(projectPath.isEmpty())
         return;
 
@@ -139,7 +148,6 @@ void MainWindow::extractTags()
     // counters
     FileCounter fileCounter(_labelFileCount);
     LineCounter lineCounter(_labelLineCount);
-    _tagCounter->reset();
 
     // comment extractor extracts all the comments
     Extractor extractor(_settings.getCommentFilter());

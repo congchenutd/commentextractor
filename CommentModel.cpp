@@ -6,25 +6,29 @@
 #include <QDir>
 #include <QRegularExpression>
 
-CommentModel::CommentModel(PackageCounter* packageCounter,
-                           CommentLineCounter* lineCounter,
+CommentModel::CommentModel(PackageCounter*       counterPkg,
+                           CommentLineCounter*   counterCmtLine,
+                           CommentLengthCounter* counterCmtLen,
                            QObject* parent)
     : QStandardItemModel(parent),
-      _packageCounter(packageCounter),
-      _lineCounter(lineCounter)
+      _counterPkg    (counterPkg),
+      _counterCmtLine(counterCmtLine),
+      _counterCmtLen (counterCmtLen)
 {
-    setColumnCount(4);
+    setColumnCount(5);
     setHeaderData(COL_PACKAGE, Qt::Horizontal, tr("Package"));
     setHeaderData(COL_FILE,    Qt::Horizontal, tr("File"));
     setHeaderData(COL_LINE,    Qt::Horizontal, tr("Line"));
     setHeaderData(COL_COMMENT, Qt::Horizontal, tr("Comment"));
+    setHeaderData(COL_LEN,     Qt::Horizontal, tr("Length"));
 }
 
 void CommentModel::clear()
 {
     removeRows(0, rowCount());
-    _packageCounter->reset();
-    _lineCounter   ->reset();
+    _counterPkg    ->reset();
+    _counterCmtLine->reset();
+    _counterCmtLen ->reset();
     _packages.clear();
 }
 
@@ -46,15 +50,18 @@ void CommentModel::addComment(const QString& package, const QString& filePath,
     setData(index(lastRow, COL_FILE),    filePath);
     setData(index(lastRow, COL_LINE),    lineNum);
     setData(index(lastRow, COL_COMMENT), content);
+    int wordCount = content.count(QRegExp("\\b\\w+\\b"));
+    setData(index(lastRow, COL_LEN), wordCount);
 
     // count package
     if(!_packages.contains(package))  // new package
     {
         _packages.insert(package);
-        _packageCounter->increase();
+        _counterPkg->increase();
     }
 
-    _lineCounter->increase(content.count("\n") + 1);
+    _counterCmtLine->increase(content.count("\n") + 1);
+    _counterCmtLen ->increase(wordCount);
 }
 
 TextBlock CommentModel::getComment(int row) const {
