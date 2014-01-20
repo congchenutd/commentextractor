@@ -7,14 +7,16 @@
 class TextBlock;
 class PackageCounter;
 class CommentLineCounter;
+class CommentLengthCounter;
 class QTextStream;
 
 // Model for comment tab
 class CommentModel : public QStandardItemModel
 {
 public:
-    CommentModel(PackageCounter*     packageCounter,
-                 CommentLineCounter* lineCounter,
+    CommentModel(PackageCounter*       counterPkg,
+                 CommentLineCounter*   counterCmtLine,
+                 CommentLengthCounter* counterCmtLen,
                  QObject* parent = 0);
 
     void clear();
@@ -30,14 +32,15 @@ private:
     void pick(int start, int end, int n, QTextStream& os);
 
 public:
-    enum {COL_PACKAGE, COL_FILE, COL_LINE, COL_COMMENT};
+    enum {COL_PACKAGE, COL_FILE, COL_LINE, COL_LEN, COL_COMMENT};
     static QString _fieldSeparator;
     static QString _lineSeparator;
 
 private:
-    PackageCounter*     _packageCounter;
-    CommentLineCounter* _lineCounter;
-    QSet<QString>       _packages;
+    PackageCounter*       _counterPkg;
+    CommentLineCounter*   _counterCmtLine;
+    CommentLengthCounter* _counterCmtLen;
+    QSet<QString>         _packages;
 };
 
 #endif // COMMENTMODEL_H

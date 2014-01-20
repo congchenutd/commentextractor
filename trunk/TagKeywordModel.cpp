@@ -7,23 +7,29 @@
 #include <QFile>
 #include <QDir>
 #include <QApplication>
+#include <QDebug>
 
-TagKeywordModel::TagKeywordModel(QObject* parent, TagCounter*     counter,
-                                                  TagLineCounter* lineCounter)
+TagKeywordModel::TagKeywordModel(TagCounter*       counterTag,
+                                 TagLineCounter*   counterTagLine,
+                                 TagLengthCounter* counterTagLen,
+                                 QObject* parent)
     : QStandardItemModel(parent),
-      _counter(counter),
-      _lineCounter(lineCounter)
+      _counterTag    (counterTag),
+      _counterTagLine(counterTagLine),
+      _counterTagLen (counterTagLen)
 {
-    setColumnCount(3);
+    setColumnCount(4);
     setHeaderData(COL_KEYWORD,   Qt::Horizontal, tr("Keyword"));
     setHeaderData(COL_COUNT,     Qt::Horizontal, tr("Count"));
     setHeaderData(COL_LINECOUNT, Qt::Horizontal, tr("Lines"));
+    setHeaderData(COL_LEN,       Qt::Horizontal, tr("Length"));
 }
 
 void TagKeywordModel::addTag(const QString& keyword, const TextBlock& block)
 {
     TagInstanceModel* instanceModel = 0;
     int lineCount = block.getContent().count("\n") + 1;
+    int wordCount = block.getContent().count(QRegExp("\\b\\w+\\b"));
     int row = findKeyword(keyword);
     if(row == -1)  // new kw
     {
@@ -32,6 +38,7 @@ void TagKeywordModel::addTag(const QString& keyword, const TextBlock& block)
         setData(index(lastRow, COL_KEYWORD),   keyword);
         setData(index(lastRow, COL_COUNT),     1);
         setData(index(lastRow, COL_LINECOUNT), lineCount);
+        setData(index(lastRow, COL_LEN),       wordCount);
 
         instanceModel = new TagInstanceModel(keyword, this);
         _keyword2Model.insert(keyword, instanceModel);
@@ -40,6 +47,7 @@ void TagKeywordModel::addTag(const QString& keyword, const TextBlock& block)
     {
         setData(index(row, COL_COUNT),     getCount(row)     + 1);
         setData(index(row, COL_LINECOUNT), getLineCount(row) + lineCount);
+        setData(index(row, COL_LEN),       getLength   (row) + wordCount);
         instanceModel = getInstanceModel(keyword);
     }
 
@@ -47,11 +55,9 @@ void TagKeywordModel::addTag(const QString& keyword, const TextBlock& block)
     if(instanceModel != 0)
         instanceModel->addTextBlock(block);
 
-    if(_counter != 0)
-        _counter->increase();
-
-    if(_lineCounter != 0)
-        _lineCounter->increase(lineCount);
+    _counterTag    ->increase();
+    _counterTagLine->increase(lineCount);
+    _counterTagLen ->increase(wordCount);
 }
 
 TagInstanceModel* TagKeywordModel::getInstanceModel(const QString& tag) const {
@@ -65,11 +71,9 @@ void TagKeywordModel::clear()
         instanceModel->deleteLater();
     _keyword2Model.clear();
 
-    if(_counter != 0)
-        _counter->reset();
-
-    if(_lineCounter != 0)
-        _lineCounter->reset();
+    _counterTag    ->reset();
+    _counterTagLine->reset();
+    _counterTagLen ->reset();
 }
 
 void TagKeywordModel::pick(int n)
@@ -111,11 +115,9 @@ void TagKeywordModel::removeRow(int row)
     getInstanceModel(keyword)->deleteLater();
     _keyword2Model.remove(keyword);
 
-    if(_counter != 0)
-        _counter->decrease(getCount(row));
-
-    if(_lineCounter != 0)
-        _lineCounter->decrease(getLineCount(row));
+    _counterTag    ->decrease(getCount(row));
+    _counterTagLine->decrease(getLineCount(row));
+    _counterTagLen ->decrease(getLength(row));
 
     QStandardItemModel::removeRow(row);
 }
@@ -203,6 +205,10 @@ int TagKeywordModel::getCount(int row) const {
 
 int TagKeywordModel::getLineCount(int row) const {
     return data(index(row, COL_LINECOUNT)).toInt();
+}
+
+int TagKeywordModel::getLength(int row) const {
+    return data(index(row, COL_LEN)).toInt();
 }
 
 ///////////////////////////////////////////////////////////////////////

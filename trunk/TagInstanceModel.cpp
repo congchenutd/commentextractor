@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
+#include <QRegExp>
 
 TagInstanceModel::TagInstanceModel(const QString& tag, QObject* parent)
     : QStandardItemModel(parent), _keyword(tag)
@@ -107,7 +108,7 @@ void TagInstanceModel::setTextBlock(int row, const TextBlock& textBlock)
 {
     if(row < 0 || row >= rowCount())
         return;
-    setData(index(row, COL_CONTENT),  textBlock.getContent());
+    setData(index(row, COL_CONTENT),  textBlock.getContent().remove(QRegExp("[\\*\\/]")));
     setData(index(row, COL_FILEPATH), textBlock.getFilePath());
     setData(index(row, COL_LINENUM),  textBlock.getLineNumber());
 }
@@ -119,5 +120,5 @@ void TagInstanceModel::addTextBlock(const TextBlock& textBlock)
     setTextBlock(lastRow, textBlock);
 }
 
-// do not use a single return to separate lines, because some tag contents contain returns
+// do not use a single return to separate lines, because some tags contain returns
 QString TagInstanceModel::_lineSeparator = ";;;\r\n";
